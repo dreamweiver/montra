@@ -1,36 +1,220 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<div align="center">
 
-## Getting Started
+# 💰 MonTra
 
-First, run the development server:
+### Money + Tracker = MonTra
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+**Take Control of Your Money**
+
+A modern, sleek personal finance app built with Next.js 16, designed to help you track income, expenses, and visualize your financial journey.
+
+[![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+
+</div>
+
+---
+
+## ✨ Features
+
+- 🔐 **Secure Authentication** — Powered by Supabase Auth
+- 💸 **Track Transactions** — Log income and expenses with categories
+- 📊 **Dashboard Analytics** — Real-time financial overview *(coming soon)*
+- 📱 **Responsive Design** — Works beautifully on all devices
+- ⚡ **Blazing Fast** — Built on Next.js App Router with React Server Components
+- 🎨 **Modern UI** — Clean interface with shadcn/ui components
+
+---
+
+## 🛠️ Tech Stack
+
+| Category | Technology |
+|----------|------------|
+| **Framework** | Next.js 16 (App Router) |
+| **Language** | TypeScript (Strict Mode) |
+| **Styling** | Tailwind CSS v4 |
+| **UI Components** | shadcn/ui + Radix UI |
+| **Database** | Neon PostgreSQL (Serverless) |
+| **ORM** | Drizzle ORM |
+| **Authentication** | Supabase Auth |
+| **Forms** | React Hook Form + Zod |
+| **State** | Zustand |
+| **Charts** | Recharts |
+
+---
+
+## 📁 Project Structure
+
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── (auth)/            # Auth pages (login, register)
+│   └── dashboard/         # Protected dashboard routes
+├── actions/               # Server Actions
+├── components/
+│   ├── features/          # Feature-specific components
+│   ├── shared/            # Reusable components
+│   └── ui/                # shadcn/ui components
+├── db/                    # Database schema & client
+├── hooks/                 # Custom React hooks
+├── lib/                   # Utilities & constants
+└── types/                 # TypeScript definitions
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Getting Started
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Prerequisites
 
-## Learn More
+- Node.js 18+
+- npm/yarn/pnpm
+- [Neon Database](https://neon.tech) account (free tier available)
+- [Supabase](https://supabase.com) account (free tier available)
 
-To learn more about Next.js, take a look at the following resources:
+### Installation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yourusername/montra.git
+   cd montra
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-## Deploy on Vercel
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env.local
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🔐 Environment Variables Setup
+
+This app requires three environment variables. Here's how to get each one:
+
+### 1. DATABASE_URL (Neon PostgreSQL)
+
+1. Go to [neon.tech](https://neon.tech) and create a free account
+2. Create a new project
+3. In your project dashboard, click **"Connection Details"**
+4. Copy the connection string (starts with `postgresql://...`)
+
+```env
+DATABASE_URL=postgresql://username:password@ep-xxx.region.aws.neon.tech/neondb?sslmode=require
+```
+
+### 2. NEXT_PUBLIC_SUPABASE_URL
+
+1. Go to [supabase.com](https://supabase.com) and create a free account
+2. Create a new project
+3. Go to **Settings → API**
+4. Copy the **Project URL**
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+```
+
+### 3. NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+1. In the same Supabase **Settings → API** page
+2. Copy the **anon public** key (under "Project API keys")
+
+```env
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+### Your final `.env.local` should look like:
+
+```env
+# Database (Neon)
+DATABASE_URL=postgresql://username:password@ep-xxx.region.aws.neon.tech/neondb?sslmode=require
+
+# Supabase Auth
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+> ⚠️ **Important:** Never commit `.env.local` to version control. It's already in `.gitignore`.
+
+---
+
+### Continue Setup
+
+4. **Run database migrations**
+   ```bash
+   npx drizzle-kit push
+   ```
+
+5. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+
+6. **Open your browser**
+   
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+---
+
+## 📸 Screenshots
+
+<div align="center">
+
+| Dashboard | Transactions |
+|-----------|--------------|
+| *Coming soon* | *Coming soon* |
+
+</div>
+
+---
+
+## 🗺️ Roadmap
+
+### ✅ Completed
+- [x] User authentication (Supabase)
+- [x] Add transactions with categories
+- [x] View transactions list
+- [x] Delete transactions
+- [x] Edit transactions
+
+### 🚧 In Progress
+- [ ] Dashboard with real stats & summary cards
+- [ ] Charts & analytics (Recharts)
+
+### 📋 Planned
+- [ ] Filter & search transactions
+- [ ] Investments tracking page
+- [ ] Settings page (profile, preferences)
+- [ ] Export transactions to CSV
+- [ ] Dark/Light theme toggle
+- [ ] Budget goals & alerts
+- [ ] Recurring transactions
+- [ ] Multi-currency support
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to open an issue or submit a pull request.
+
+---
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+---
+
+<div align="center">
+
+**Made with ❤️ and ☕**
+
+*Track smart. Spend wise. Grow wealth.*
+
+</div>

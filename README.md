@@ -199,7 +199,26 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ---
 
-## 🤝 Contributing
+## � Testing
+
+Tests are written with [Vitest](https://vitest.dev/) + [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/) and co-located next to source files.
+
+```bash
+# Run tests in watch mode
+npm test
+
+# Single test run
+npm run test:run
+
+# Run with coverage report
+npm run test:coverage
+```
+
+Coverage reports are generated in both **terminal** and **HTML** format (at `coverage/index.html`).
+
+---
+
+## �🤝 Contributing
 
 Contributions are welcome! Feel free to open an issue or submit a pull request.
 

@@ -1,62 +1,128 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+"use client";
 
+// =============================================================================
+// Dashboard Page
+// =============================================================================
+// Main dashboard showing financial overview with stats and charts.
+// =============================================================================
+
+import { useState, useEffect, useCallback } from "react";
+import { Loader2 } from "lucide-react";
+import {
+  getDashboardStats,
+  getSpendingByCategory,
+  getMonthlyTrend,
+  getRecentTransactions,
+  type DashboardStats,
+  type CategorySpending,
+  type MonthlyTrend,
+} from "@/actions/stats";
+import {
+  StatsCards,
+  SpendingChart,
+  MonthlyTrendChart,
+  RecentTransactions,
+} from "@/components/features/dashboard";
+
+// =============================================================================
+// Types
+// =============================================================================
+interface DashboardData {
+  stats: DashboardStats;
+  spending: CategorySpending[];
+  trend: MonthlyTrend[];
+  recentTransactions: Array<{
+    id: number;
+    amount: string;
+    type: "income" | "expense";
+    description: string | null;
+    category: string | null;
+    transaction_date: string;
+    category_icon?: string | null;
+    category_color?: string | null;
+  }>;
+}
+
+// =============================================================================
+// Main Component
+// =============================================================================
 export default function DashboardPage() {
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<DashboardData | null>(null);
 
-  debugger;
+  // Fetch all dashboard data
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const [stats, spending, trend, recentTransactions] = await Promise.all([
+        getDashboardStats(),
+        getSpendingByCategory(),
+        getMonthlyTrend(),
+        getRecentTransactions(5),
+      ]);
+
+      setData({
+        stats,
+        spending,
+        trend,
+        recentTransactions: recentTransactions as DashboardData["recentTransactions"],
+      });
+    } catch (error) {
+      console.error("Failed to fetch dashboard data:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // =============================================================================
+  // Loading State
+  // =============================================================================
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  // =============================================================================
+  // Main Render
+  // =============================================================================
   return (
-    <div className="space-y-8">
-      {/* Welcome & Quick Stats */}
+    <div className="space-y-6">
+      {/* Header */}
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground mt-2">
+        <p className="text-muted-foreground mt-1">
           Welcome back! Here&apos;s your financial overview.
         </p>
       </div>
 
-      {/* Quick Stats Cards */}
-      <div className="grid gap-6 md:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Net Worth</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">₹1,24,500</div>
-            <p className="text-xs text-green-600">+12% from last month</p>
-          </CardContent>
-        </Card>
+      {/* Stats Cards */}
+      {data && (
+        <StatsCards
+          totalIncome={data.stats.totalIncome}
+          totalExpense={data.stats.totalExpense}
+          balance={data.stats.balance}
+          transactionCount={data.stats.transactionCount}
+        />
+      )}
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Monthly Income</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">₹85,000</div>
-            <p className="text-xs text-muted-foreground">Last 30 days</p>
-          </CardContent>
-        </Card>
+      {/* Charts Row */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Monthly Trend */}
+        {data && <MonthlyTrendChart data={data.trend} />}
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Monthly Expenses</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">₹52,300</div>
-            <p className="text-xs text-muted-foreground">Last 30 days</p>
-          </CardContent>
-        </Card>
+        {/* Spending by Category */}
+        {data && <SpendingChart data={data.spending} />}
       </div>
 
-      {/* Placeholder for future charts / transactions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Transactions</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            No transactions yet. Add your first one to get started!
-          </p>
-        </CardContent>
-      </Card>
+      {/* Recent Transactions */}
+      {data && <RecentTransactions transactions={data.recentTransactions} />}
     </div>
   );
 }

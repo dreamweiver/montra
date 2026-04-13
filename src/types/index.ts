@@ -12,4 +12,20 @@ export type {
   TransactionWithAmount,
 } from "./transaction";
 
+export type {
+  Category,
+  CategoryFormData,
+} from "./category";
+
+export {
+  DEFAULT_CATEGORY_ICONS,
+  DEFAULT_CATEGORY_COLORS,
+} from "./category";
+
+export type {
+  RecurringTransaction,
+  RecurringTransactionFormData,
+  RecurrenceFrequency,
+} from "./recurring";
+
 export type { ApiResponse } from "./api";

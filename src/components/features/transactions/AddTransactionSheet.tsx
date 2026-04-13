@@ -8,7 +8,7 @@
 // Includes an animated loading overlay while the transaction is being saved.
 // =============================================================================
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -23,9 +23,11 @@ import { format } from "date-fns";
 import { CalendarIcon, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { addTransaction } from "@/actions/transactions";
+import { getCategories } from "@/actions/categories";
 import { transactionSchema, type TransactionFormData } from "@/lib/validations";
 import { TRANSACTION_CATEGORIES } from "@/lib/constants";
 import { LoadingOverlay } from "@/components/shared";
+import type { Category } from "@/types";
 
 // =============================================================================
 // Component Props
@@ -43,6 +45,8 @@ export default function AddTransactionSheet({ onSuccess }: AddTransactionSheetPr
   const [open, setOpen] = useState(false);
   // Loading state for API call
   const [loading, setLoading] = useState(false);
+  // Dynamic categories from database
+  const [categories, setCategories] = useState<Category[]>([]);
 
   // ---------------------------------------------
   // React Hook Form Setup
@@ -77,6 +81,17 @@ export default function AddTransactionSheet({ onSuccess }: AddTransactionSheetPr
   // Watch field values for reactive UI updates (e.g., button highlighting)
   const type = watch("type");
   const transactionDate = watch("transaction_date");
+
+  // Fetch categories when type changes
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const data = await getCategories(type);
+      setCategories(data);
+      // Reset category selection when type changes
+      setValue("category", "");
+    };
+    fetchCategories();
+  }, [type, setValue]);
 
   // ---------------------------------------------
   // Form Submit Handler
@@ -221,11 +236,24 @@ export default function AddTransactionSheet({ onSuccess }: AddTransactionSheetPr
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {TRANSACTION_CATEGORIES.map((cat) => (
-                      <SelectItem key={cat} value={cat}>
-                        {cat}
-                      </SelectItem>
-                    ))}
+                    {/* Dynamic categories from database */}
+                    {categories.length > 0 ? (
+                      categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.name}>
+                          <span className="flex items-center gap-2">
+                            <span>{cat.icon}</span>
+                            <span>{cat.name}</span>
+                          </span>
+                        </SelectItem>
+                      ))
+                    ) : (
+                      /* Fallback to hardcoded categories if none in DB */
+                      TRANSACTION_CATEGORIES.map((cat) => (
+                        <SelectItem key={cat} value={cat}>
+                          {cat}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               )}

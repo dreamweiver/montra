@@ -11,3 +11,8 @@ export {
   type TransactionFormData,
   type TransactionFilterData,
 } from "./transaction";
+
+export {
+  recurringTransactionSchema,
+  type RecurringTransactionFormData,
+} from "./recurring";

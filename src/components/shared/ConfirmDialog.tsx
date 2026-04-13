@@ -24,8 +24,8 @@ import type { ReactNode } from "react";
 // Component Props
 // ---------------------------------------------
 interface ConfirmDialogProps {
-  /** Trigger element (e.g., delete button) */
-  trigger: ReactNode;
+  /** Trigger element (e.g., delete button) - optional for controlled mode */
+  trigger?: ReactNode;
   /** Dialog title */
   title: string;
   /** Dialog description/message */
@@ -38,6 +38,8 @@ interface ConfirmDialogProps {
   onConfirm: () => void | Promise<void>;
   /** Whether the action is destructive (red button) */
   destructive?: boolean;
+  /** Loading state disables buttons */
+  loading?: boolean;
   /** Open state (controlled) */
   open?: boolean;
   /** Open state change handler (controlled) */
@@ -55,6 +57,7 @@ export default function ConfirmDialog({
   cancelText = "Cancel",
   onConfirm,
   destructive = false,
+  loading = false,
   open,
   onOpenChange,
 }: ConfirmDialogProps) {
@@ -67,19 +70,20 @@ export default function ConfirmDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
+      {trigger && <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>}
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{cancelText}</AlertDialogCancel>
+          <AlertDialogCancel disabled={loading}>{cancelText}</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleConfirm}
+            disabled={loading}
             className={destructive ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}
           >
-            {confirmText}
+            {loading ? "Processing..." : confirmText}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

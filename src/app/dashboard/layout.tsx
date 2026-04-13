@@ -352,7 +352,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { LogOut, Home, CreditCard, TrendingUp, Settings, Menu } from "lucide-react";
+import { LogOut, Home, CreditCard, TrendingUp, Settings, Menu, FolderOpen, CalendarClock } from "lucide-react";
 
 export default function DashboardLayout({
   children,
@@ -418,6 +418,24 @@ export default function DashboardLayout({
             >
               <CreditCard className="mr-3 h-5 w-5" />
               {sidebarOpen && "Transactions"}
+            </Button>
+
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start"
+              onClick={() => router.push("/dashboard/categories")}
+            >
+              <FolderOpen className="mr-3 h-5 w-5" />
+              {sidebarOpen && "Categories"}
+            </Button>
+
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start"
+              onClick={() => router.push("/dashboard/recurring")}
+            >
+              <CalendarClock className="mr-3 h-5 w-5" />
+              {sidebarOpen && "Recurring"}
             </Button>
 
             <Button variant="ghost" className="w-full justify-start">

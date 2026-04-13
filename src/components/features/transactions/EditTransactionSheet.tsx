@@ -23,10 +23,11 @@ import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
 import { updateTransaction } from "@/actions/transactions";
+import { getCategories } from "@/actions/categories";
 import { transactionSchema, type TransactionFormData } from "@/lib/validations";
 import { TRANSACTION_CATEGORIES } from "@/lib/constants";
 import { LoadingOverlay } from "@/components/shared";
-import type { Transaction } from "@/types";
+import type { Transaction, Category } from "@/types";
 
 // =============================================================================
 // Component Props
@@ -52,6 +53,7 @@ export default function EditTransactionSheet({
   onSuccess,
 }: EditTransactionSheetProps) {
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   // ---------------------------------------------
   // React Hook Form Setup
@@ -78,6 +80,15 @@ export default function EditTransactionSheet({
   // Watch field values for reactive UI updates
   const type = watch("type");
   const transactionDate = watch("transaction_date");
+
+  // Fetch categories when type changes
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const data = await getCategories(type);
+      setCategories(data);
+    };
+    fetchCategories();
+  }, [type]);
 
   // ---------------------------------------------
   // Populate Form When Transaction Changes
@@ -216,11 +227,24 @@ export default function EditTransactionSheet({
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {TRANSACTION_CATEGORIES.map((cat) => (
-                      <SelectItem key={cat} value={cat}>
-                        {cat}
-                      </SelectItem>
-                    ))}
+                    {/* Dynamic categories from database */}
+                    {categories.length > 0 ? (
+                      categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.name}>
+                          <span className="flex items-center gap-2">
+                            <span>{cat.icon}</span>
+                            <span>{cat.name}</span>
+                          </span>
+                        </SelectItem>
+                      ))
+                    ) : (
+                      /* Fallback to hardcoded categories if none in DB */
+                      TRANSACTION_CATEGORIES.map((cat) => (
+                        <SelectItem key={cat} value={cat}>
+                          {cat}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               )}

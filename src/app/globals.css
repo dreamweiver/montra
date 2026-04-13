@@ -45,6 +45,31 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  
+  /* Tremor chart colors for Tailwind v4 */
+  --color-tremor-brand: #3b82f6;
+  --color-tremor-brand-muted: #60a5fa;
+  --color-tremor-brand-subtle: #dbeafe;
+  --color-tremor-brand-inverted: #ffffff;
+  
+  /* Standard colors for Tremor */
+  --color-red-500: #ef4444;
+  --color-orange-500: #f97316;
+  --color-amber-500: #f59e0b;
+  --color-yellow-500: #eab308;
+  --color-lime-500: #84cc16;
+  --color-green-500: #22c55e;
+  --color-emerald-500: #10b981;
+  --color-teal-500: #14b8a6;
+  --color-cyan-500: #06b6d4;
+  --color-sky-500: #0ea5e9;
+  --color-blue-500: #3b82f6;
+  --color-indigo-500: #6366f1;
+  --color-violet-500: #8b5cf6;
+  --color-purple-500: #a855f7;
+  --color-fuchsia-500: #d946ef;
+  --color-pink-500: #ec4899;
+  --color-rose-500: #f43f5e;
 }
 
 :root {
@@ -126,4 +151,208 @@
   html {
     @apply font-sans;
   }
+}
+
+/* Tremor Color Overrides for Tailwind v4 compatibility */
+:root {
+  /* Tremor chart colors */
+  --tremor-content-subtle: #6b7280;
+  --tremor-content-DEFAULT: #374151;
+  --tremor-content-emphasis: #111827;
+  --tremor-content-strong: #030712;
+  --tremor-content-inverted: #ffffff;
+  
+  --tremor-border-DEFAULT: #e5e7eb;
+  
+  --tremor-background-muted: #f9fafb;
+  --tremor-background-subtle: #f3f4f6;
+  --tremor-background-DEFAULT: #ffffff;
+  --tremor-background-emphasis: #374151;
+  
+  --tremor-ring-DEFAULT: rgba(59, 130, 246, 0.5);
+}
+
+/* Tremor bar/chart fill colors */
+[data-testid="bar-chart"] [fill],
+.recharts-bar-rectangle [fill] {
+  fill: currentColor;
+}
+
+/* Green/Emerald for income */
+.fill-green-500, [class*="fill-green"] { fill: #22c55e !important; }
+.fill-emerald-500, [class*="fill-emerald"] { fill: #10b981 !important; }
+
+/* Red/Rose for expense */
+.fill-red-500, [class*="fill-red"] { fill: #ef4444 !important; }
+.fill-rose-500, [class*="fill-rose"] { fill: #f43f5e !important; }
+
+/* Tremor specific color classes */
+[class*="tremor"][class*="green"], 
+[class*="bg-green"] { 
+  --tw-bg-opacity: 1;
+  background-color: rgb(34 197 94 / var(--tw-bg-opacity)) !important;
+}
+[class*="tremor"][class*="red"],
+[class*="bg-red"] { 
+  --tw-bg-opacity: 1;
+  background-color: rgb(239 68 68 / var(--tw-bg-opacity)) !important;
+}
+[class*="tremor"][class*="emerald"] { 
+  --tw-bg-opacity: 1;
+  background-color: rgb(16 185 129 / var(--tw-bg-opacity)) !important;
+}
+[class*="tremor"][class*="rose"] { 
+  --tw-bg-opacity: 1;
+  background-color: rgb(244 63 94 / var(--tw-bg-opacity)) !important;
+}
+
+/* Donut/Pie chart colors */
+[class*="tremor"][class*="orange"] { background-color: #f97316 !important; }
+[class*="tremor"][class*="amber"] { background-color: #f59e0b !important; }
+[class*="tremor"][class*="yellow"] { background-color: #eab308 !important; }
+[class*="tremor"][class*="lime"] { background-color: #84cc16 !important; }
+[class*="tremor"][class*="teal"] { background-color: #14b8a6 !important; }
+[class*="tremor"][class*="cyan"] { background-color: #06b6d4 !important; }
+[class*="tremor"][class*="sky"] { background-color: #0ea5e9 !important; }
+[class*="tremor"][class*="blue"] { background-color: #3b82f6 !important; }
+[class*="tremor"][class*="indigo"] { background-color: #6366f1 !important; }
+[class*="tremor"][class*="violet"] { background-color: #8b5cf6 !important; }
+[class*="tremor"][class*="purple"] { background-color: #a855f7 !important; }
+[class*="tremor"][class*="fuchsia"] { background-color: #d946ef !important; }
+[class*="tremor"][class*="pink"] { background-color: #ec4899 !important; }
+
+/* Recharts SVG color fixes for Tremor */
+/* Fill utility classes for Tailwind v4 */
+.fill-green, .fill-green-500 { fill: #22c55e !important; }
+.fill-emerald, .fill-emerald-500 { fill: #10b981 !important; }
+.fill-red, .fill-red-500 { fill: #ef4444 !important; }
+.fill-rose, .fill-rose-500 { fill: #f43f5e !important; }
+.fill-orange, .fill-orange-500 { fill: #f97316 !important; }
+.fill-amber, .fill-amber-500 { fill: #f59e0b !important; }
+.fill-yellow, .fill-yellow-500 { fill: #eab308 !important; }
+.fill-lime, .fill-lime-500 { fill: #84cc16 !important; }
+.fill-teal, .fill-teal-500 { fill: #14b8a6 !important; }
+.fill-cyan, .fill-cyan-500 { fill: #06b6d4 !important; }
+.fill-sky, .fill-sky-500 { fill: #0ea5e9 !important; }
+.fill-blue, .fill-blue-500 { fill: #3b82f6 !important; }
+.fill-indigo, .fill-indigo-500 { fill: #6366f1 !important; }
+.fill-violet, .fill-violet-500 { fill: #8b5cf6 !important; }
+.fill-purple, .fill-purple-500 { fill: #a855f7 !important; }
+.fill-fuchsia, .fill-fuchsia-500 { fill: #d946ef !important; }
+.fill-pink, .fill-pink-500 { fill: #ec4899 !important; }
+
+/* Text color utility for SVG with currentColor fills */
+.text-green, .text-green-500 { color: #22c55e; }
+.text-emerald, .text-emerald-500 { color: #10b981; }
+.text-red, .text-red-500 { color: #ef4444; }
+.text-rose, .text-rose-500 { color: #f43f5e; }
+.text-orange, .text-orange-500 { color: #f97316; }
+.text-amber, .text-amber-500 { color: #f59e0b; }
+.text-yellow, .text-yellow-500 { color: #eab308; }
+.text-lime, .text-lime-500 { color: #84cc16; }
+.text-teal, .text-teal-500 { color: #14b8a6; }
+.text-cyan, .text-cyan-500 { color: #06b6d4; }
+.text-sky, .text-sky-500 { color: #0ea5e9; }
+.text-blue, .text-blue-500 { color: #3b82f6; }
+.text-indigo, .text-indigo-500 { color: #6366f1; }
+.text-violet, .text-violet-500 { color: #8b5cf6; }
+.text-purple, .text-purple-500 { color: #a855f7; }
+.text-fuchsia, .text-fuchsia-500 { color: #d946ef; }
+.text-pink, .text-pink-500 { color: #ec4899; }
+
+/* Tremor applies fill via currentColor - ensure SVG inherits colors */
+svg path[fill="currentColor"] { fill: currentColor; }
+
+/* Pie chart color overrides */
+
+/* Pie/Donut sector colors */
+.recharts-pie-sector:nth-child(1) path { fill: #ef4444 !important; }
+.recharts-pie-sector:nth-child(2) path { fill: #f97316 !important; }
+.recharts-pie-sector:nth-child(3) path { fill: #f59e0b !important; }
+.recharts-pie-sector:nth-child(4) path { fill: #eab308 !important; }
+.recharts-pie-sector:nth-child(5) path { fill: #84cc16 !important; }
+.recharts-pie-sector:nth-child(6) path { fill: #22c55e !important; }
+.recharts-pie-sector:nth-child(7) path { fill: #10b981 !important; }
+.recharts-pie-sector:nth-child(8) path { fill: #14b8a6 !important; }
+.recharts-pie-sector:nth-child(9) path { fill: #06b6d4 !important; }
+.recharts-pie-sector:nth-child(10) path { fill: #0ea5e9 !important; }
+.recharts-pie-sector:nth-child(11) path { fill: #3b82f6 !important; }
+.recharts-pie-sector:nth-child(12) path { fill: #6366f1 !important; }
+.recharts-pie-sector:nth-child(13) path { fill: #8b5cf6 !important; }
+.recharts-pie-sector:nth-child(14) path { fill: #a855f7 !important; }
+.recharts-pie-sector:nth-child(15) path { fill: #d946ef !important; }
+
+/* Tremor chart tooltip styles - Aggressive overrides */
+.recharts-tooltip-wrapper {
+  z-index: 50 !important;
+}
+
+.recharts-tooltip-wrapper > div,
+.recharts-default-tooltip,
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 0.5rem !important;
+  padding: 0.75rem !important;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
+  opacity: 1 !important;
+}
+
+.recharts-tooltip-item-list {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+}
+
+.recharts-tooltip-label {
+  color: #111827 !important;
+  font-weight: 600 !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.recharts-tooltip-item {
+  color: #374151 !important;
+}
+
+.recharts-tooltip-item-name,
+.recharts-tooltip-item-value {
+  color: #374151 !important;
+}
+
+/* Tremor DonutChart tooltip - all possible selectors */
+[data-tremor-id="tremor-default-tooltip"],
+.tremor-tooltip,
+div[role="tooltip"],
+.tremor-Tooltip-root,
+[class*="tremor"][class*="tooltip"],
+[class*="Tooltip"] {
+  background-color: #ffffff !important;
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 0.5rem !important;
+  padding: 0.5rem 0.75rem !important;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important;
+  color: #111827 !important;
+  opacity: 1 !important;
+}
+
+/* Dark mode tooltip */
+.dark .recharts-default-tooltip {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+.dark .recharts-tooltip-label {
+  color: #f9fafb !important;
+}
+
+.dark .recharts-tooltip-item {
+  color: #d1d5db !important;
+}
+
+.dark [data-tremor-id="tremor-default-tooltip"],
+.dark .tremor-tooltip {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #f9fafb !important;
 }

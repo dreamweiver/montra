@@ -3,19 +3,26 @@
 // =============================================================================
 // Transactions Page
 // =============================================================================
-// Displays all user transactions in a table with CRUD functionality.
+// Displays all user transactions with filters, stats, charts, and CRUD.
 // =============================================================================
 
-import AddTransactionSheet from "@/components/features/transactions/AddTransactionSheet";
-import EditTransactionSheet from "@/components/features/transactions/EditTransactionSheet";
 import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, TrendingDown, Loader2, Pencil, Trash2 } from "lucide-react";
+import { TrendingUp, TrendingDown, Loader2, Pencil, Trash2, PieChart, List } from "lucide-react";
 import { toast } from "sonner";
 import { getTransactions, deleteTransaction } from "@/actions/transactions";
 import { format } from "date-fns";
 import { EmptyState, ConfirmDialog } from "@/components/shared";
+import {
+  AddTransactionSheet,
+  EditTransactionSheet,
+  TransactionFilters,
+  TransactionStats,
+  TransactionChart,
+  TransactionPieChart,
+  type TransactionFiltersType,
+} from "@/components/features/transactions";
 import type { Transaction } from "@/types";
 
 export default function TransactionsPage() {
@@ -23,13 +30,27 @@ export default function TransactionsPage() {
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [showChart, setShowChart] = useState(true);
+  
+  // Filter state
+  const [filters, setFilters] = useState<TransactionFiltersType>({
+    startDate: undefined,
+    endDate: undefined,
+    type: "all",
+    category: "all",
+  });
 
   // ---------------------------------------------
   // Fetch Transactions
   // ---------------------------------------------
   const fetchTransactions = useCallback(async () => {
     setLoading(true);
-    const result = await getTransactions();
+    const result = await getTransactions({
+      startDate: filters.startDate,
+      endDate: filters.endDate,
+      type: filters.type,
+      category: filters.category,
+    });
     
     if (!result.success) {
       toast.error(result.error || "Failed to load transactions");
@@ -37,7 +58,7 @@ export default function TransactionsPage() {
       setTransactions(result.data as Transaction[]);
     }
     setLoading(false);
-  }, []);
+  }, [filters]);
 
   useEffect(() => {
     fetchTransactions();
@@ -67,8 +88,36 @@ export default function TransactionsPage() {
           <p className="text-muted-foreground">Manage your income and expenses</p>
         </div>
 
-        <AddTransactionSheet onSuccess={fetchTransactions} />
+        <div className="flex items-center gap-2">
+          {/* Toggle Chart/List View */}
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setShowChart(!showChart)}
+            title={showChart ? "Hide charts" : "Show charts"}
+          >
+            {showChart ? <List className="h-4 w-4" /> : <PieChart className="h-4 w-4" />}
+          </Button>
+          
+          <AddTransactionSheet onSuccess={fetchTransactions} />
+        </div>
       </div>
+
+      {/* Filters */}
+      <TransactionFilters filters={filters} onFiltersChange={setFilters} />
+
+      {/* Stats Summary */}
+      {!loading && transactions.length > 0 && (
+        <TransactionStats transactions={transactions} />
+      )}
+
+      {/* Charts Row */}
+      {showChart && !loading && transactions.length > 0 && (
+        <div className="grid gap-6 lg:grid-cols-2">
+          <TransactionChart transactions={transactions} />
+          <TransactionPieChart transactions={transactions} />
+        </div>
+      )}
 
       {/* Edit Transaction Sheet */}
       <EditTransactionSheet

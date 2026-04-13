@@ -74,7 +74,14 @@ export async function addTransaction(formData: FormData) {
 // =============================================================================
 // Get Transactions
 // =============================================================================
-export async function getTransactions() {
+export interface TransactionFiltersParam {
+  startDate?: Date;
+  endDate?: Date;
+  type?: "income" | "expense" | "all";
+  category?: string;
+}
+
+export async function getTransactions(filters?: TransactionFiltersParam) {
   try {
     const user = await getAuthUser();
 
@@ -82,12 +89,90 @@ export async function getTransactions() {
       return { success: false, error: "You must be logged in", data: [] };
     }
 
-    const transactions = await sql`
-      SELECT id, amount, type, description, category, transaction_date, created_at
-      FROM transactions
-      WHERE user_id = ${user.id}
-      ORDER BY transaction_date DESC, created_at DESC
-    `;
+    // Build dynamic query based on filters
+    let transactions;
+
+    if (filters?.startDate && filters?.endDate && filters?.type && filters?.type !== "all" && filters?.category && filters.category !== "all") {
+      // All filters
+      transactions = await sql`
+        SELECT id, amount, type, description, category, transaction_date, created_at
+        FROM transactions
+        WHERE user_id = ${user.id}
+          AND transaction_date >= ${filters.startDate}
+          AND transaction_date <= ${filters.endDate}
+          AND type = ${filters.type}
+          AND category = ${filters.category}
+        ORDER BY transaction_date DESC, created_at DESC
+      `;
+    } else if (filters?.startDate && filters?.endDate && filters?.type && filters.type !== "all") {
+      // Date + type
+      transactions = await sql`
+        SELECT id, amount, type, description, category, transaction_date, created_at
+        FROM transactions
+        WHERE user_id = ${user.id}
+          AND transaction_date >= ${filters.startDate}
+          AND transaction_date <= ${filters.endDate}
+          AND type = ${filters.type}
+        ORDER BY transaction_date DESC, created_at DESC
+      `;
+    } else if (filters?.startDate && filters?.endDate && filters?.category && filters.category !== "all") {
+      // Date + category
+      transactions = await sql`
+        SELECT id, amount, type, description, category, transaction_date, created_at
+        FROM transactions
+        WHERE user_id = ${user.id}
+          AND transaction_date >= ${filters.startDate}
+          AND transaction_date <= ${filters.endDate}
+          AND category = ${filters.category}
+        ORDER BY transaction_date DESC, created_at DESC
+      `;
+    } else if (filters?.startDate && filters?.endDate) {
+      // Date only
+      transactions = await sql`
+        SELECT id, amount, type, description, category, transaction_date, created_at
+        FROM transactions
+        WHERE user_id = ${user.id}
+          AND transaction_date >= ${filters.startDate}
+          AND transaction_date <= ${filters.endDate}
+        ORDER BY transaction_date DESC, created_at DESC
+      `;
+    } else if (filters?.type && filters.type !== "all" && filters?.category && filters.category !== "all") {
+      // Type + category
+      transactions = await sql`
+        SELECT id, amount, type, description, category, transaction_date, created_at
+        FROM transactions
+        WHERE user_id = ${user.id}
+          AND type = ${filters.type}
+          AND category = ${filters.category}
+        ORDER BY transaction_date DESC, created_at DESC
+      `;
+    } else if (filters?.type && filters.type !== "all") {
+      // Type only
+      transactions = await sql`
+        SELECT id, amount, type, description, category, transaction_date, created_at
+        FROM transactions
+        WHERE user_id = ${user.id}
+          AND type = ${filters.type}
+        ORDER BY transaction_date DESC, created_at DESC
+      `;
+    } else if (filters?.category && filters.category !== "all") {
+      // Category only
+      transactions = await sql`
+        SELECT id, amount, type, description, category, transaction_date, created_at
+        FROM transactions
+        WHERE user_id = ${user.id}
+          AND category = ${filters.category}
+        ORDER BY transaction_date DESC, created_at DESC
+      `;
+    } else {
+      // No filters
+      transactions = await sql`
+        SELECT id, amount, type, description, category, transaction_date, created_at
+        FROM transactions
+        WHERE user_id = ${user.id}
+        ORDER BY transaction_date DESC, created_at DESC
+      `;
+    }
 
     return { success: true, data: transactions };
 

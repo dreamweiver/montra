@@ -9,32 +9,8 @@
 
 import { sql } from "@/db/neon";
 import { revalidatePath } from "next/cache";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
-
-// ---------------------------------------------
-// Helper: Get Authenticated User
-// ---------------------------------------------
-// Returns the current user or null if not authenticated.
-// ---------------------------------------------
-async function getAuthUser() {
-  const cookieStore = await cookies();
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-      },
-    }
-  );
-
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
-}
+import { getAuthUser } from "@/actions/auth";
+import { extractErrorMessage } from "@/lib/utils";
 
 // =============================================================================
 // Add Transaction
@@ -65,7 +41,7 @@ export async function addTransaction(formData: FormData) {
     return { success: true };
 
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Failed to add transaction";
+    const message = extractErrorMessage(error, "Failed to add transaction");
     console.error("Add transaction error:", error);
     return { success: false, error: message };
   }
@@ -177,7 +153,7 @@ export async function getTransactions(filters?: TransactionFiltersParam) {
     return { success: true, data: transactions };
 
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Failed to fetch transactions";
+    const message = extractErrorMessage(error, "Failed to fetch transactions");
     console.error("Get transactions error:", error);
     return { success: false, error: message, data: [] };
   }
@@ -210,7 +186,7 @@ export async function deleteTransaction(id: number) {
     return { success: true };
 
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Failed to delete transaction";
+    const message = extractErrorMessage(error, "Failed to delete transaction");
     console.error("Delete transaction error:", error);
     return { success: false, error: message };
   }
@@ -255,7 +231,7 @@ export async function updateTransaction(id: number, formData: FormData) {
     return { success: true };
 
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Failed to update transaction";
+    const message = extractErrorMessage(error, "Failed to update transaction");
     console.error("Update transaction error:", error);
     return { success: false, error: message };
   }
@@ -285,7 +261,7 @@ export async function getTransaction(id: number) {
     return { success: true, data: transactions[0] };
 
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Failed to fetch transaction";
+    const message = extractErrorMessage(error, "Failed to fetch transaction");
     console.error("Get transaction error:", error);
     return { success: false, error: message, data: null };
   }

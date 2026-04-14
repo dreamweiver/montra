@@ -3,9 +3,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 // =============================================================================
 // Mocks
 // =============================================================================
-const { mockSql, mockGetUser, mockRevalidatePath } = vi.hoisted(() => ({
+const { mockSql, mockGetAuthUser, mockRevalidatePath } = vi.hoisted(() => ({
   mockSql: vi.fn(),
-  mockGetUser: vi.fn(),
+  mockGetAuthUser: vi.fn(),
   mockRevalidatePath: vi.fn(),
 }));
 
@@ -17,16 +17,8 @@ vi.mock("next/cache", () => ({
   revalidatePath: mockRevalidatePath,
 }));
 
-vi.mock("next/headers", () => ({
-  cookies: vi.fn().mockResolvedValue({
-    get: vi.fn(),
-  }),
-}));
-
-vi.mock("@supabase/ssr", () => ({
-  createServerClient: () => ({
-    auth: { getUser: mockGetUser },
-  }),
+vi.mock("@/actions/auth", () => ({
+  getAuthUser: mockGetAuthUser,
 }));
 
 import {
@@ -45,7 +37,7 @@ describe("Transaction Server Actions", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetUser.mockResolvedValue({ data: { user: mockUser } });
+    mockGetAuthUser.mockResolvedValue(mockUser);
   });
 
   // ---------------------------------------------------------------------------
@@ -53,7 +45,7 @@ describe("Transaction Server Actions", () => {
   // ---------------------------------------------------------------------------
   describe("addTransaction", () => {
     it("should return error if not authenticated", async () => {
-      mockGetUser.mockResolvedValueOnce({ data: { user: null } });
+      mockGetAuthUser.mockResolvedValueOnce(null);
       const formData = new FormData();
       formData.set("amount", "100");
       formData.set("type", "expense");
@@ -99,7 +91,7 @@ describe("Transaction Server Actions", () => {
   // ---------------------------------------------------------------------------
   describe("getTransactions", () => {
     it("should return error if not authenticated", async () => {
-      mockGetUser.mockResolvedValueOnce({ data: { user: null } });
+      mockGetAuthUser.mockResolvedValueOnce(null);
       const result = await getTransactions();
       expect(result).toEqual({ success: false, error: "You must be logged in", data: [] });
     });
@@ -165,7 +157,7 @@ describe("Transaction Server Actions", () => {
   // ---------------------------------------------------------------------------
   describe("deleteTransaction", () => {
     it("should return error if not authenticated", async () => {
-      mockGetUser.mockResolvedValueOnce({ data: { user: null } });
+      mockGetAuthUser.mockResolvedValueOnce(null);
       const result = await deleteTransaction(1);
       expect(result).toEqual({ success: false, error: "You must be logged in" });
     });
@@ -189,7 +181,7 @@ describe("Transaction Server Actions", () => {
   // ---------------------------------------------------------------------------
   describe("updateTransaction", () => {
     it("should return error if not authenticated", async () => {
-      mockGetUser.mockResolvedValueOnce({ data: { user: null } });
+      mockGetAuthUser.mockResolvedValueOnce(null);
       const formData = new FormData();
       formData.set("amount", "100");
       formData.set("type", "expense");
@@ -233,7 +225,7 @@ describe("Transaction Server Actions", () => {
   // ---------------------------------------------------------------------------
   describe("getTransaction", () => {
     it("should return error if not authenticated", async () => {
-      mockGetUser.mockResolvedValueOnce({ data: { user: null } });
+      mockGetAuthUser.mockResolvedValueOnce(null);
       const result = await getTransaction(1);
       expect(result).toEqual({ success: false, error: "You must be logged in", data: null });
     });

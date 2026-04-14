@@ -8,7 +8,7 @@
 
 import { Card } from "@tremor/react";
 import { DonutChart } from "@tremor/react";
-import { CURRENCY } from "@/lib/constants";
+import { formatCurrency } from "@/lib/utils";
 import type { Transaction } from "@/types";
 
 // =============================================================================
@@ -17,17 +17,6 @@ import type { Transaction } from "@/types";
 interface TransactionPieChartProps {
   transactions: Transaction[];
   title?: string;
-}
-
-// =============================================================================
-// Helper: Format Currency
-// =============================================================================
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat(CURRENCY.locale, {
-    style: "currency",
-    currency: CURRENCY.code,
-    maximumFractionDigits: 0,
-  }).format(amount);
 }
 
 // =============================================================================
@@ -66,7 +55,6 @@ interface CustomTooltipProps {
 function CustomTooltip({ payload, active }: CustomTooltipProps) {
   if (!active || !payload?.length) return null;
   const item = payload[0];
-  const colorIdx = 0;
 
   return (
     <div

@@ -33,10 +33,10 @@ export default function Home() {
 
           <div className="flex flex-col justify-center gap-4 sm:flex-row">
             <Button size="lg" asChild>
-              <Link href="/register">Get Started — It's Free</Link>
+              <Link href="/register">Get Started — It&apos;s Free</Link>
             </Button>
             <Button size="lg" variant="outline" asChild>
-              <Link href="/login">Already have an account? Login</Link>
+              <Link href="/login">Already have an account? Log in</Link>
             </Button>
           </div>
         </div>

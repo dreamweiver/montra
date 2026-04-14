@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { deleteCategory } from "@/actions/categories";
 import { ConfirmDialog } from "@/components/shared";
 import { Category } from "@/types";
+import { extractErrorMessage } from "@/lib/utils";
 
 // =============================================================================
 // Component Props
@@ -45,7 +46,7 @@ export default function CategoryCard({ category, onEdit, onDelete }: CategoryCar
       toast.success("Category deleted successfully!");
       onDelete();
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "An error occurred";
+      const message = extractErrorMessage(error);
       console.error(error);
       toast.error("Failed to delete category", { description: message });
     } finally {

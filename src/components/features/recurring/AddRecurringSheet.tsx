@@ -24,6 +24,7 @@ import { addRecurringTransaction } from "@/actions/recurring";
 import { getCategories } from "@/actions/categories";
 import { recurringTransactionSchema, type RecurringTransactionFormData } from "@/lib/validations";
 import { LoadingOverlay } from "@/components/shared";
+import { FREQUENCY_OPTIONS } from "@/lib/constants";
 import type { Category } from "@/types";
 
 // =============================================================================
@@ -32,16 +33,6 @@ import type { Category } from "@/types";
 interface AddRecurringSheetProps {
   onSuccess?: () => void;
 }
-
-// =============================================================================
-// Frequency Labels
-// =============================================================================
-const FREQUENCY_OPTIONS = [
-  { value: "daily", label: "Daily" },
-  { value: "weekly", label: "Weekly" },
-  { value: "monthly", label: "Monthly" },
-  { value: "yearly", label: "Yearly" },
-] as const;
 
 // =============================================================================
 // Main Component

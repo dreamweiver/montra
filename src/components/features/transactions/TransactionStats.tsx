@@ -8,7 +8,7 @@
 
 import { Card } from "@tremor/react";
 import { TrendingUp, TrendingDown, Scale } from "lucide-react";
-import { CURRENCY } from "@/lib/constants";
+import { formatCurrency } from "@/lib/utils";
 import type { Transaction } from "@/types";
 
 // =============================================================================
@@ -16,17 +16,6 @@ import type { Transaction } from "@/types";
 // =============================================================================
 interface TransactionStatsProps {
   transactions: Transaction[];
-}
-
-// =============================================================================
-// Helper: Format Currency
-// =============================================================================
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat(CURRENCY.locale, {
-    style: "currency",
-    currency: CURRENCY.code,
-    maximumFractionDigits: 0,
-  }).format(amount);
 }
 
 // =============================================================================

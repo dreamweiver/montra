@@ -28,6 +28,7 @@ import { transactionSchema, type TransactionFormData } from "@/lib/validations";
 import { TRANSACTION_CATEGORIES } from "@/lib/constants";
 import { LoadingOverlay } from "@/components/shared";
 import type { Category } from "@/types";
+import { extractErrorMessage } from "@/lib/utils";
 
 // =============================================================================
 // Component Props
@@ -125,7 +126,7 @@ export default function AddTransactionSheet({ onSuccess }: AddTransactionSheetPr
       onSuccess?.();
 
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "An error occurred";
+      const message = extractErrorMessage(error);
       console.error(error);
       toast.error("Failed to add transaction", {
         description: message,

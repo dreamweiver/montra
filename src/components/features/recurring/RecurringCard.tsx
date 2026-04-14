@@ -18,7 +18,8 @@ import {
   ArrowDownCircle,
 } from "lucide-react";
 import type { RecurringTransaction } from "@/types";
-import { CURRENCY } from "@/lib/constants";
+import { formatCurrency } from "@/lib/utils";
+import { FREQUENCY_LABELS } from "@/lib/constants";
 
 // =============================================================================
 // Props
@@ -33,14 +34,6 @@ interface RecurringCardProps {
 // =============================================================================
 // Helpers
 // =============================================================================
-function formatCurrency(amount: string): string {
-  return new Intl.NumberFormat(CURRENCY.locale, {
-    style: "currency",
-    currency: CURRENCY.code,
-    maximumFractionDigits: 0,
-  }).format(parseFloat(amount));
-}
-
 /** Parse a date string and format in UTC to avoid timezone shifts */
 function formatDateUTC(dateStr: string): string {
   const d = new Date(dateStr);
@@ -51,13 +44,6 @@ function formatDateUTC(dateStr: string): string {
     timeZone: "UTC",
   });
 }
-
-const FREQUENCY_LABELS: Record<string, string> = {
-  daily: "Daily",
-  weekly: "Weekly",
-  monthly: "Monthly",
-  yearly: "Yearly",
-};
 
 // =============================================================================
 // Main Component

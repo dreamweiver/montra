@@ -9,7 +9,7 @@
 
 import { Card } from "@tremor/react";
 import { TrendingUp, TrendingDown, Wallet, Receipt } from "lucide-react";
-import { CURRENCY } from "@/lib/constants";
+import { formatCurrency } from "@/lib/utils";
 
 // =============================================================================
 // Types
@@ -19,17 +19,6 @@ interface StatsCardsProps {
   totalExpense: number;
   balance: number;
   transactionCount: number;
-}
-
-// =============================================================================
-// Helper: Format Currency
-// =============================================================================
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat(CURRENCY.locale, {
-    style: "currency",
-    currency: CURRENCY.code,
-    maximumFractionDigits: 0,
-  }).format(amount);
 }
 
 // =============================================================================

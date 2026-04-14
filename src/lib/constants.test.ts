@@ -6,6 +6,10 @@ import {
   CURRENCY,
   DATE_FORMATS,
   PAGINATION,
+  CATEGORY_EMOJIS,
+  CATEGORY_COLORS,
+  FREQUENCY_OPTIONS,
+  FREQUENCY_LABELS,
 } from "@/lib/constants";
 
 describe("Constants", () => {
@@ -73,6 +77,55 @@ describe("Constants", () => {
       expect(PAGINATION.pageSizeOptions).toContain(
         PAGINATION.defaultPageSize,
       );
+    });
+  });
+
+  describe("CATEGORY_EMOJIS", () => {
+    it("should contain 30 emojis", () => {
+      expect(CATEGORY_EMOJIS).toHaveLength(30);
+    });
+
+    it("should contain common emojis", () => {
+      expect(CATEGORY_EMOJIS).toContain("🍔");
+      expect(CATEGORY_EMOJIS).toContain("📦");
+    });
+  });
+
+  describe("CATEGORY_COLORS", () => {
+    it("should contain 20 colors", () => {
+      expect(CATEGORY_COLORS).toHaveLength(20);
+    });
+
+    it("should contain valid hex colors", () => {
+      for (const color of CATEGORY_COLORS) {
+        expect(color).toMatch(/^#[0-9a-f]{6}$/);
+      }
+    });
+  });
+
+  describe("FREQUENCY_OPTIONS", () => {
+    it("should contain 4 frequency options", () => {
+      expect(FREQUENCY_OPTIONS).toHaveLength(4);
+    });
+
+    it("should have value and label for each option", () => {
+      for (const opt of FREQUENCY_OPTIONS) {
+        expect(opt).toHaveProperty("value");
+        expect(opt).toHaveProperty("label");
+      }
+    });
+
+    it("should include monthly", () => {
+      expect(FREQUENCY_OPTIONS.map((o) => o.value)).toContain("monthly");
+    });
+  });
+
+  describe("FREQUENCY_LABELS", () => {
+    it("should map all frequency values", () => {
+      expect(FREQUENCY_LABELS.daily).toBe("Daily");
+      expect(FREQUENCY_LABELS.weekly).toBe("Weekly");
+      expect(FREQUENCY_LABELS.monthly).toBe("Monthly");
+      expect(FREQUENCY_LABELS.yearly).toBe("Yearly");
     });
   });
 });

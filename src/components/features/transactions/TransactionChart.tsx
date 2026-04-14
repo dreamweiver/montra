@@ -9,7 +9,7 @@
 import { Card } from "@tremor/react";
 import { BarChart } from "@tremor/react";
 import { format, eachDayOfInterval, startOfDay, subDays } from "date-fns";
-import { CURRENCY } from "@/lib/constants";
+import { formatCurrency } from "@/lib/utils";
 import type { Transaction } from "@/types";
 
 // =============================================================================
@@ -18,17 +18,6 @@ import type { Transaction } from "@/types";
 interface TransactionChartProps {
   transactions: Transaction[];
   title?: string;
-}
-
-// =============================================================================
-// Helper: Format Currency
-// =============================================================================
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat(CURRENCY.locale, {
-    style: "currency",
-    currency: CURRENCY.code,
-    maximumFractionDigits: 0,
-  }).format(amount);
 }
 
 // =============================================================================

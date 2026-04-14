@@ -18,12 +18,14 @@ describe("recurringTransactionSchema", () => {
   });
 
   it("should accept data without description", () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { description, ...data } = validData;
     const result = recurringTransactionSchema.safeParse(data);
     expect(result.success).toBe(true);
   });
 
   it("should accept data without end_date", () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { end_date, ...data } = validData;
     const result = recurringTransactionSchema.safeParse(data);
     expect(result.success).toBe(true);
@@ -129,6 +131,7 @@ describe("recurringTransactionSchema", () => {
 
   // Date validation
   it("should reject missing start_date", () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { start_date, ...data } = validData;
     const result = recurringTransactionSchema.safeParse(data);
     expect(result.success).toBe(false);

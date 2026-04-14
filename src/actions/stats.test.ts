@@ -3,9 +3,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 // =============================================================================
 // Mocks
 // =============================================================================
-const { mockSql, mockGetUser } = vi.hoisted(() => ({
+const { mockSql, mockGetAuthUser } = vi.hoisted(() => ({
   mockSql: vi.fn(),
-  mockGetUser: vi.fn(),
+  mockGetAuthUser: vi.fn(),
 }));
 
 vi.mock("@/db/neon", () => ({
@@ -16,16 +16,8 @@ vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
 
-vi.mock("next/headers", () => ({
-  cookies: vi.fn().mockResolvedValue({
-    get: vi.fn(),
-  }),
-}));
-
-vi.mock("@supabase/ssr", () => ({
-  createServerClient: () => ({
-    auth: { getUser: mockGetUser },
-  }),
+vi.mock("@/actions/auth", () => ({
+  getAuthUser: mockGetAuthUser,
 }));
 
 import {
@@ -42,7 +34,7 @@ describe("Stats Server Actions", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetUser.mockResolvedValue({ data: { user: mockUser } });
+    mockGetAuthUser.mockResolvedValue(mockUser);
   });
 
   // ---------------------------------------------------------------------------
@@ -50,7 +42,7 @@ describe("Stats Server Actions", () => {
   // ---------------------------------------------------------------------------
   describe("getDashboardStats", () => {
     it("should return zeroed stats if not authenticated", async () => {
-      mockGetUser.mockResolvedValueOnce({ data: { user: null } });
+      mockGetAuthUser.mockResolvedValueOnce(null);
       const result = await getDashboardStats();
       expect(result).toEqual({
         totalIncome: 0,
@@ -110,7 +102,7 @@ describe("Stats Server Actions", () => {
   // ---------------------------------------------------------------------------
   describe("getSpendingByCategory", () => {
     it("should return empty array if not authenticated", async () => {
-      mockGetUser.mockResolvedValueOnce({ data: { user: null } });
+      mockGetAuthUser.mockResolvedValueOnce(null);
       const result = await getSpendingByCategory();
       expect(result).toEqual([]);
     });
@@ -150,7 +142,7 @@ describe("Stats Server Actions", () => {
   // ---------------------------------------------------------------------------
   describe("getIncomeByCategory", () => {
     it("should return empty array if not authenticated", async () => {
-      mockGetUser.mockResolvedValueOnce({ data: { user: null } });
+      mockGetAuthUser.mockResolvedValueOnce(null);
       const result = await getIncomeByCategory();
       expect(result).toEqual([]);
     });

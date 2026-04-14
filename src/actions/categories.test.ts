@@ -3,9 +3,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 // =============================================================================
 // Mocks — vi.hoisted ensures these exist before vi.mock hoisting
 // =============================================================================
-const { mockSql, mockGetUser, mockRevalidatePath } = vi.hoisted(() => ({
+const { mockSql, mockGetAuthUser, mockRevalidatePath } = vi.hoisted(() => ({
   mockSql: vi.fn(),
-  mockGetUser: vi.fn(),
+  mockGetAuthUser: vi.fn(),
   mockRevalidatePath: vi.fn(),
 }));
 
@@ -17,16 +17,8 @@ vi.mock("next/cache", () => ({
   revalidatePath: mockRevalidatePath,
 }));
 
-vi.mock("next/headers", () => ({
-  cookies: vi.fn().mockResolvedValue({
-    get: vi.fn(),
-  }),
-}));
-
-vi.mock("@supabase/ssr", () => ({
-  createServerClient: () => ({
-    auth: { getUser: mockGetUser },
-  }),
+vi.mock("@/actions/auth", () => ({
+  getAuthUser: mockGetAuthUser,
 }));
 
 // Import after mocks
@@ -46,7 +38,7 @@ describe("Category Server Actions", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetUser.mockResolvedValue({ data: { user: mockUser } });
+    mockGetAuthUser.mockResolvedValue(mockUser);
   });
 
   // ---------------------------------------------------------------------------
@@ -54,7 +46,7 @@ describe("Category Server Actions", () => {
   // ---------------------------------------------------------------------------
   describe("getCategories", () => {
     it("should return empty array if not authenticated", async () => {
-      mockGetUser.mockResolvedValueOnce({ data: { user: null } });
+      mockGetAuthUser.mockResolvedValueOnce(null);
       const result = await getCategories();
       expect(result).toEqual([]);
     });
@@ -87,7 +79,7 @@ describe("Category Server Actions", () => {
   // ---------------------------------------------------------------------------
   describe("addCategory", () => {
     it("should return error if not authenticated", async () => {
-      mockGetUser.mockResolvedValueOnce({ data: { user: null } });
+      mockGetAuthUser.mockResolvedValueOnce(null);
       const formData = new FormData();
       formData.set("name", "Food");
       formData.set("type", "expense");
@@ -142,7 +134,7 @@ describe("Category Server Actions", () => {
   // ---------------------------------------------------------------------------
   describe("updateCategory", () => {
     it("should return error if not authenticated", async () => {
-      mockGetUser.mockResolvedValueOnce({ data: { user: null } });
+      mockGetAuthUser.mockResolvedValueOnce(null);
       const formData = new FormData();
       formData.set("name", "Food");
       formData.set("icon", "🍔");
@@ -181,7 +173,7 @@ describe("Category Server Actions", () => {
   // ---------------------------------------------------------------------------
   describe("deleteCategory", () => {
     it("should return error if not authenticated", async () => {
-      mockGetUser.mockResolvedValueOnce({ data: { user: null } });
+      mockGetAuthUser.mockResolvedValueOnce(null);
       const result = await deleteCategory(1);
       expect(result).toEqual({ success: false, error: "You must be logged in" });
     });
@@ -208,7 +200,7 @@ describe("Category Server Actions", () => {
   // ---------------------------------------------------------------------------
   describe("seedDefaultCategories", () => {
     it("should return error if not authenticated", async () => {
-      mockGetUser.mockResolvedValueOnce({ data: { user: null } });
+      mockGetAuthUser.mockResolvedValueOnce(null);
       const result = await seedDefaultCategories();
       expect(result).toEqual({ success: false, error: "You must be logged in" });
     });

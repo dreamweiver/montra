@@ -8,10 +8,11 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarIcon, X } from "lucide-react";
+import { CalendarIcon, Search, X } from "lucide-react";
 import { format, startOfMonth, endOfMonth, subMonths } from "date-fns";
 import { getCategories } from "@/actions/categories";
 import type { Category, TransactionType } from "@/types";
@@ -24,6 +25,7 @@ export interface TransactionFilters {
   endDate: Date | undefined;
   type: TransactionType | "all";
   category: string | "all";
+  search: string;
 }
 
 interface TransactionFiltersProps {
@@ -80,6 +82,7 @@ export default function TransactionFiltersComponent({
       endDate: undefined,
       type: "all",
       category: "all",
+      search: "",
     });
   };
 
@@ -87,10 +90,24 @@ export default function TransactionFiltersComponent({
     filters.startDate ||
     filters.endDate ||
     filters.type !== "all" ||
-    filters.category !== "all";
+    filters.category !== "all" ||
+    filters.search.length > 0;
 
   return (
     <div className="flex flex-wrap items-center gap-3 p-4 bg-muted/30 rounded-lg">
+      {/* Search Input */}
+      <div className="relative">
+        <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="Search transactions..."
+          value={filters.search}
+          onChange={(e) => updateFilter("search", e.target.value)}
+          className="h-9 w-[200px] pl-8"
+        />
+      </div>
+
+      <div className="w-px h-6 bg-border mx-2" />
+
       {/* Date Range Presets */}
       <div className="flex flex-wrap gap-2">
         {DATE_PRESETS.map((preset) => (

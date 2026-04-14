@@ -8,7 +8,7 @@
 
 import { Card } from "@tremor/react";
 import { DonutChart } from "@tremor/react";
-import { CURRENCY } from "@/lib/constants";
+import { formatCurrency } from "@/lib/utils";
 
 // =============================================================================
 // Types
@@ -24,17 +24,6 @@ interface CategorySpending {
 interface SpendingChartProps {
   data: CategorySpending[];
   title?: string;
-}
-
-// =============================================================================
-// Helper: Format Currency
-// =============================================================================
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat(CURRENCY.locale, {
-    style: "currency",
-    currency: CURRENCY.code,
-    maximumFractionDigits: 0,
-  }).format(amount);
 }
 
 // =============================================================================

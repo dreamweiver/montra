@@ -16,6 +16,7 @@ describe("transactionSchema", () => {
   });
 
   it("should accept transaction without description", () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { description, ...data } = validData;
     const result = transactionSchema.safeParse(data);
     expect(result.success).toBe(true);
@@ -83,6 +84,7 @@ describe("transactionSchema", () => {
   });
 
   it("should reject missing transaction_date", () => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { transaction_date, ...data } = validData;
     const result = transactionSchema.safeParse(data);
     expect(result.success).toBe(false);

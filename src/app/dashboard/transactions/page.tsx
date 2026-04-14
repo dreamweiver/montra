@@ -6,7 +6,7 @@
 // Displays all user transactions with filters, stats, charts, and CRUD.
 // =============================================================================
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, TrendingDown, Loader2, Pencil, Trash2, PieChart, List } from "lucide-react";
@@ -38,6 +38,7 @@ export default function TransactionsPage() {
     endDate: undefined,
     type: "all",
     category: "all",
+    search: "",
   });
 
   // ---------------------------------------------
@@ -61,8 +62,45 @@ export default function TransactionsPage() {
   }, [filters]);
 
   useEffect(() => {
-    fetchTransactions();
-  }, [fetchTransactions]);
+    let cancelled = false;
+
+    getTransactions({
+      startDate: filters.startDate,
+      endDate: filters.endDate,
+      type: filters.type,
+      category: filters.category,
+    }).then((result) => {
+      if (cancelled) return;
+      if (!result.success) {
+        toast.error(result.error || "Failed to load transactions");
+      } else {
+        setTransactions(result.data as Transaction[]);
+      }
+      setLoading(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [filters]);
+
+  // ---------------------------------------------
+  // Client-side search filter
+  // ---------------------------------------------
+  const filteredTransactions = useMemo(() => {
+    const query = filters.search.trim().toLowerCase();
+    if (!query) return transactions;
+    return transactions.filter((tx) => {
+      const description = (tx.description || "").toLowerCase();
+      const category = (tx.category || "").toLowerCase();
+      const amount = parseFloat(tx.amount).toLocaleString("en-IN");
+      return (
+        description.includes(query) ||
+        category.includes(query) ||
+        amount.includes(query)
+      );
+    });
+  }, [transactions, filters.search]);
 
   // ---------------------------------------------
   // Delete Transaction Handler
@@ -107,15 +145,15 @@ export default function TransactionsPage() {
       <TransactionFilters filters={filters} onFiltersChange={setFilters} />
 
       {/* Stats Summary */}
-      {!loading && transactions.length > 0 && (
-        <TransactionStats transactions={transactions} />
+      {!loading && filteredTransactions.length > 0 && (
+        <TransactionStats transactions={filteredTransactions} />
       )}
 
       {/* Charts Row */}
-      {showChart && !loading && transactions.length > 0 && (
+      {showChart && !loading && filteredTransactions.length > 0 && (
         <div className="grid gap-6 lg:grid-cols-2">
-          <TransactionChart transactions={transactions} />
-          <TransactionPieChart transactions={transactions} />
+          <TransactionChart transactions={filteredTransactions} />
+          <TransactionPieChart transactions={filteredTransactions} />
         </div>
       )}
 
@@ -132,7 +170,14 @@ export default function TransactionsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>All Transactions</CardTitle>
+          <CardTitle>
+            All Transactions
+            {filters.search && filteredTransactions.length !== transactions.length && (
+              <span className="text-sm font-normal text-muted-foreground ml-2">
+                ({filteredTransactions.length} of {transactions.length})
+              </span>
+            )}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -140,10 +185,10 @@ export default function TransactionsPage() {
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
               <p className="text-muted-foreground">Loading transactions...</p>
             </div>
-          ) : transactions.length === 0 ? (
+          ) : filteredTransactions.length === 0 ? (
             <EmptyState
-              title="No transactions yet"
-              description="Start tracking your finances by adding your first income or expense transaction."
+              title={filters.search ? "No matching transactions" : "No transactions yet"}
+              description={filters.search ? `No transactions match "${filters.search}".` : "Start tracking your finances by adding your first income or expense transaction."}
             >
               <div className="flex gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
@@ -169,7 +214,7 @@ export default function TransactionsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {transactions.map((tx) => (
+                  {filteredTransactions.map((tx) => (
                     <tr key={tx.id} className="border-b hover:bg-muted/50">
                       <td className="py-3 px-4">
                         {format(new Date(tx.transaction_date), "dd MMM yyyy")}

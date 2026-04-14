@@ -3,9 +3,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 // =============================================================================
 // Mocks
 // =============================================================================
-const { mockSql, mockGetUser, mockRevalidatePath } = vi.hoisted(() => ({
+const { mockSql, mockGetAuthUser, mockRevalidatePath } = vi.hoisted(() => ({
   mockSql: vi.fn(),
-  mockGetUser: vi.fn(),
+  mockGetAuthUser: vi.fn(),
   mockRevalidatePath: vi.fn(),
 }));
 
@@ -17,16 +17,8 @@ vi.mock("next/cache", () => ({
   revalidatePath: mockRevalidatePath,
 }));
 
-vi.mock("next/headers", () => ({
-  cookies: vi.fn().mockResolvedValue({
-    get: vi.fn(),
-  }),
-}));
-
-vi.mock("@supabase/ssr", () => ({
-  createServerClient: () => ({
-    auth: { getUser: mockGetUser },
-  }),
+vi.mock("@/actions/auth", () => ({
+  getAuthUser: mockGetAuthUser,
 }));
 
 import {
@@ -46,7 +38,7 @@ describe("Recurring Transaction Server Actions", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetUser.mockResolvedValue({ data: { user: mockUser } });
+    mockGetAuthUser.mockResolvedValue(mockUser);
   });
 
   // ---------------------------------------------------------------------------
@@ -54,7 +46,7 @@ describe("Recurring Transaction Server Actions", () => {
   // ---------------------------------------------------------------------------
   describe("getRecurringTransactions", () => {
     it("should return empty array if not authenticated", async () => {
-      mockGetUser.mockResolvedValueOnce({ data: { user: null } });
+      mockGetAuthUser.mockResolvedValueOnce(null);
       const result = await getRecurringTransactions();
       expect(result).toEqual([]);
     });
@@ -80,7 +72,7 @@ describe("Recurring Transaction Server Actions", () => {
   // ---------------------------------------------------------------------------
   describe("addRecurringTransaction", () => {
     it("should return error if not authenticated", async () => {
-      mockGetUser.mockResolvedValueOnce({ data: { user: null } });
+      mockGetAuthUser.mockResolvedValueOnce(null);
       const result = await addRecurringTransaction({
         amount: "500",
         type: "expense",
@@ -137,7 +129,7 @@ describe("Recurring Transaction Server Actions", () => {
   // ---------------------------------------------------------------------------
   describe("updateRecurringTransaction", () => {
     it("should return error if not authenticated", async () => {
-      mockGetUser.mockResolvedValueOnce({ data: { user: null } });
+      mockGetAuthUser.mockResolvedValueOnce(null);
       const result = await updateRecurringTransaction(1, {
         amount: "600",
         type: "expense",
@@ -170,7 +162,7 @@ describe("Recurring Transaction Server Actions", () => {
   // ---------------------------------------------------------------------------
   describe("deleteRecurringTransaction", () => {
     it("should return error if not authenticated", async () => {
-      mockGetUser.mockResolvedValueOnce({ data: { user: null } });
+      mockGetAuthUser.mockResolvedValueOnce(null);
       const result = await deleteRecurringTransaction(1);
       expect(result).toEqual({ success: false, error: "Not authenticated" });
     });
@@ -188,7 +180,7 @@ describe("Recurring Transaction Server Actions", () => {
   // ---------------------------------------------------------------------------
   describe("toggleRecurringTransaction", () => {
     it("should return error if not authenticated", async () => {
-      mockGetUser.mockResolvedValueOnce({ data: { user: null } });
+      mockGetAuthUser.mockResolvedValueOnce(null);
       const result = await toggleRecurringTransaction(1, false);
       expect(result).toEqual({ success: false, error: "Not authenticated" });
     });
@@ -211,7 +203,7 @@ describe("Recurring Transaction Server Actions", () => {
   // ---------------------------------------------------------------------------
   describe("processDueRecurringTransactions", () => {
     it("should return error if not authenticated", async () => {
-      mockGetUser.mockResolvedValueOnce({ data: { user: null } });
+      mockGetAuthUser.mockResolvedValueOnce(null);
       const result = await processDueRecurringTransactions();
       expect(result).toEqual({ success: false, processed: 0 });
     });

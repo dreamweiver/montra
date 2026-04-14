@@ -17,22 +17,8 @@ import { toast } from "sonner";
 import { addCategory } from "@/actions/categories";
 import { LoadingOverlay } from "@/components/shared";
 import { TransactionType } from "@/types";
-
-// =============================================================================
-// Emoji Picker Data
-// =============================================================================
-const CATEGORY_EMOJIS = [
-  "🍔", "🍕", "☕", "🛒", "🛍️", "🏠", "🚗", "⛽", "🚌", "✈️",
-  "🎬", "🎮", "📱", "💻", "📄", "💡", "🏥", "💊", "🎓", "📚",
-  "💰", "💵", "💳", "📈", "🏦", "👔", "👗", "💼", "🎁", "📦",
-];
-
-const CATEGORY_COLORS = [
-  "#ef4444", "#f97316", "#f59e0b", "#eab308", "#84cc16",
-  "#22c55e", "#10b981", "#14b8a6", "#06b6d4", "#0ea5e9",
-  "#3b82f6", "#6366f1", "#8b5cf6", "#a855f7", "#d946ef",
-  "#ec4899", "#f43f5e", "#6b7280", "#78716c", "#71717a",
-];
+import { CATEGORY_EMOJIS, CATEGORY_COLORS } from "@/lib/constants";
+import { extractErrorMessage } from "@/lib/utils";
 
 // =============================================================================
 // Component Props
@@ -98,7 +84,7 @@ export default function AddCategorySheet({ type, onSuccess }: AddCategorySheetPr
       setOpen(false);
       onSuccess?.();
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "An error occurred";
+      const message = extractErrorMessage(error);
       console.error(error);
       toast.error("Failed to add category", { description: message });
     } finally {

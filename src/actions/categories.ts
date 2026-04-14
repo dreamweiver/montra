@@ -9,32 +9,10 @@
 
 import { sql } from "@/db/neon";
 import { revalidatePath } from "next/cache";
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
+import { getAuthUser } from "@/actions/auth";
 import { Category } from "@/types/category";
 import { DEFAULT_CATEGORY_ICONS, DEFAULT_CATEGORY_COLORS } from "@/types/category";
-
-// ---------------------------------------------
-// Helper: Get Authenticated User
-// ---------------------------------------------
-async function getAuthUser() {
-  const cookieStore = await cookies();
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value;
-        },
-      },
-    }
-  );
-
-  const { data: { user } } = await supabase.auth.getUser();
-  return user;
-}
+import { extractErrorMessage } from "@/lib/utils";
 
 // =============================================================================
 // Get Categories
@@ -105,7 +83,7 @@ export async function addCategory(formData: FormData) {
 
     return { success: true };
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Failed to add category";
+    const message = extractErrorMessage(error, "Failed to add category");
     console.error("Add category error:", error);
     return { success: false, error: message };
   }
@@ -146,7 +124,7 @@ export async function updateCategory(id: number, formData: FormData) {
 
     return { success: true };
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Failed to update category";
+    const message = extractErrorMessage(error, "Failed to update category");
     console.error("Update category error:", error);
     return { success: false, error: message };
   }
@@ -184,7 +162,7 @@ export async function deleteCategory(id: number) {
 
     return { success: true };
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Failed to delete category";
+    const message = extractErrorMessage(error, "Failed to delete category");
     console.error("Delete category error:", error);
     return { success: false, error: message };
   }
@@ -253,7 +231,7 @@ export async function seedDefaultCategories() {
 
     return { success: true };
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Failed to seed categories";
+    const message = extractErrorMessage(error, "Failed to seed categories");
     console.error("Seed categories error:", error);
     return { success: false, error: message };
   }

@@ -7,6 +7,7 @@ describe("recurringTransactionSchema", () => {
     type: "expense" as const,
     description: "Monthly rent",
     category: "Rent",
+    currency: "INR",
     frequency: "monthly" as const,
     start_date: new Date("2026-04-01"),
     end_date: null,

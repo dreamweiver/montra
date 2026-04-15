@@ -22,6 +22,7 @@ export interface RecurringTransaction {
   description: string | null;
   category: string | null;
   category_id: number | null;
+  currency: string;
   frequency: RecurrenceFrequency;
   start_date: string;
   end_date: string | null;

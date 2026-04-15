@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { getTransactions, deleteTransaction } from "@/actions/transactions";
 import { format } from "date-fns";
 import { EmptyState, ConfirmDialog } from "@/components/shared";
+import { formatCurrency } from "@/lib/utils";
 import {
   AddTransactionSheet,
   EditTransactionSheet,
@@ -93,7 +94,7 @@ export default function TransactionsPage() {
     return transactions.filter((tx) => {
       const description = (tx.description || "").toLowerCase();
       const category = (tx.category || "").toLowerCase();
-      const amount = parseFloat(tx.amount).toLocaleString("en-IN");
+      const amount = formatCurrency(parseFloat(tx.amount), tx.currency);
       return (
         description.includes(query) ||
         category.includes(query) ||
@@ -228,7 +229,7 @@ export default function TransactionsPage() {
                       <td className={`py-3 px-4 text-right font-medium ${
                         tx.type === "income" ? "text-green-600" : "text-red-600"
                       }`}>
-                        {tx.type === "income" ? "+" : "-"} ₹{parseFloat(tx.amount).toLocaleString('en-IN')}
+                        {tx.type === "income" ? "+" : "-"} {formatCurrency(parseFloat(tx.amount), tx.currency)}
                       </td>
                       <td className="py-3 px-4 text-right">
                         <div className="flex justify-end gap-1">

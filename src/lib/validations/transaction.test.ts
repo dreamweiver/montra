@@ -7,6 +7,7 @@ describe("transactionSchema", () => {
     type: "expense" as const,
     description: "Groceries",
     category: "Food",
+    currency: "INR",
     transaction_date: new Date("2026-04-10"),
   };
 

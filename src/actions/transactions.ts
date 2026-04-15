@@ -27,13 +27,14 @@ export async function addTransaction(formData: FormData) {
     const type = formData.get("type") as "income" | "expense";
     const description = formData.get("description") as string;
     const category = formData.get("category") as string;
+    const currency = (formData.get("currency") as string) || "INR";
     const transaction_date = formData.get("transaction_date") as string;
 
     await sql`
       INSERT INTO transactions 
-        (user_id, amount, type, description, category, transaction_date)
+        (user_id, amount, type, description, category, currency, transaction_date)
       VALUES 
-        (${user.id}, ${parseFloat(amount)}, ${type}, ${description || null}, ${category}, ${new Date(transaction_date)})
+        (${user.id}, ${parseFloat(amount)}, ${type}, ${description || null}, ${category}, ${currency}, ${new Date(transaction_date)})
     `;
 
     revalidatePath("/dashboard/transactions");
@@ -71,7 +72,7 @@ export async function getTransactions(filters?: TransactionFiltersParam) {
     if (filters?.startDate && filters?.endDate && filters?.type && filters?.type !== "all" && filters?.category && filters.category !== "all") {
       // All filters
       transactions = await sql`
-        SELECT id, amount, type, description, category, transaction_date, created_at
+        SELECT id, amount, type, description, category, currency, transaction_date, created_at
         FROM transactions
         WHERE user_id = ${user.id}
           AND transaction_date >= ${filters.startDate}
@@ -83,7 +84,7 @@ export async function getTransactions(filters?: TransactionFiltersParam) {
     } else if (filters?.startDate && filters?.endDate && filters?.type && filters.type !== "all") {
       // Date + type
       transactions = await sql`
-        SELECT id, amount, type, description, category, transaction_date, created_at
+        SELECT id, amount, type, description, category, currency, transaction_date, created_at
         FROM transactions
         WHERE user_id = ${user.id}
           AND transaction_date >= ${filters.startDate}
@@ -94,7 +95,7 @@ export async function getTransactions(filters?: TransactionFiltersParam) {
     } else if (filters?.startDate && filters?.endDate && filters?.category && filters.category !== "all") {
       // Date + category
       transactions = await sql`
-        SELECT id, amount, type, description, category, transaction_date, created_at
+        SELECT id, amount, type, description, category, currency, transaction_date, created_at
         FROM transactions
         WHERE user_id = ${user.id}
           AND transaction_date >= ${filters.startDate}
@@ -105,7 +106,7 @@ export async function getTransactions(filters?: TransactionFiltersParam) {
     } else if (filters?.startDate && filters?.endDate) {
       // Date only
       transactions = await sql`
-        SELECT id, amount, type, description, category, transaction_date, created_at
+        SELECT id, amount, type, description, category, currency, transaction_date, created_at
         FROM transactions
         WHERE user_id = ${user.id}
           AND transaction_date >= ${filters.startDate}
@@ -115,7 +116,7 @@ export async function getTransactions(filters?: TransactionFiltersParam) {
     } else if (filters?.type && filters.type !== "all" && filters?.category && filters.category !== "all") {
       // Type + category
       transactions = await sql`
-        SELECT id, amount, type, description, category, transaction_date, created_at
+        SELECT id, amount, type, description, category, currency, transaction_date, created_at
         FROM transactions
         WHERE user_id = ${user.id}
           AND type = ${filters.type}
@@ -125,7 +126,7 @@ export async function getTransactions(filters?: TransactionFiltersParam) {
     } else if (filters?.type && filters.type !== "all") {
       // Type only
       transactions = await sql`
-        SELECT id, amount, type, description, category, transaction_date, created_at
+        SELECT id, amount, type, description, category, currency, transaction_date, created_at
         FROM transactions
         WHERE user_id = ${user.id}
           AND type = ${filters.type}
@@ -134,7 +135,7 @@ export async function getTransactions(filters?: TransactionFiltersParam) {
     } else if (filters?.category && filters.category !== "all") {
       // Category only
       transactions = await sql`
-        SELECT id, amount, type, description, category, transaction_date, created_at
+        SELECT id, amount, type, description, category, currency, transaction_date, created_at
         FROM transactions
         WHERE user_id = ${user.id}
           AND category = ${filters.category}
@@ -143,7 +144,7 @@ export async function getTransactions(filters?: TransactionFiltersParam) {
     } else {
       // No filters
       transactions = await sql`
-        SELECT id, amount, type, description, category, transaction_date, created_at
+        SELECT id, amount, type, description, category, currency, transaction_date, created_at
         FROM transactions
         WHERE user_id = ${user.id}
         ORDER BY transaction_date DESC, created_at DESC
@@ -207,6 +208,7 @@ export async function updateTransaction(id: number, formData: FormData) {
     const type = formData.get("type") as "income" | "expense";
     const description = formData.get("description") as string;
     const category = formData.get("category") as string;
+    const currency = (formData.get("currency") as string) || "INR";
     const transaction_date = formData.get("transaction_date") as string;
 
     // Update only if transaction belongs to user (security check)
@@ -217,6 +219,7 @@ export async function updateTransaction(id: number, formData: FormData) {
         type = ${type},
         description = ${description || null},
         category = ${category},
+        currency = ${currency},
         transaction_date = ${new Date(transaction_date)}
       WHERE id = ${id} AND user_id = ${user.id}
       RETURNING id
@@ -249,7 +252,7 @@ export async function getTransaction(id: number) {
     }
 
     const transactions = await sql`
-      SELECT id, amount, type, description, category, transaction_date, created_at
+      SELECT id, amount, type, description, category, currency, transaction_date, created_at
       FROM transactions
       WHERE id = ${id} AND user_id = ${user.id}
     `;

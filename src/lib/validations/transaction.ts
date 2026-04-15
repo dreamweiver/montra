@@ -27,6 +27,7 @@ export const transactionSchema = z.object({
   type: z.enum(["income", "expense"]),
   description: z.string().optional(),
   category: z.string().min(1, "Please select a category"),
+  currency: z.string().min(1, "Please select a currency"),
   transaction_date: z.date(),
 });
 

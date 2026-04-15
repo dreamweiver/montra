@@ -25,8 +25,8 @@ import { toast } from "sonner";
 import { updateTransaction } from "@/actions/transactions";
 import { getCategories } from "@/actions/categories";
 import { transactionSchema, type TransactionFormData } from "@/lib/validations";
-import { TRANSACTION_CATEGORIES } from "@/lib/constants";
-import { LoadingOverlay } from "@/components/shared";
+import { TRANSACTION_CATEGORIES, SUPPORTED_CURRENCIES } from "@/lib/constants";
+import { LoadingOverlay, CurrencySelector } from "@/components/shared";
 import type { Transaction, Category } from "@/types";
 import { extractErrorMessage } from "@/lib/utils";
 
@@ -74,12 +74,14 @@ export default function EditTransactionSheet({
       type: "expense",
       description: "",
       category: "",
+      currency: "INR",
       transaction_date: new Date(),
     },
   });
 
   // Watch field values for reactive UI updates
   const type = watch("type");
+  const currency = watch("currency");
   const transactionDate = watch("transaction_date");
 
   // Fetch categories when type changes
@@ -101,6 +103,7 @@ export default function EditTransactionSheet({
         type: transaction.type,
         description: transaction.description || "",
         category: transaction.category || "",
+        currency: transaction.currency || "INR",
         transaction_date: new Date(transaction.transaction_date),
       });
     }
@@ -120,6 +123,7 @@ export default function EditTransactionSheet({
       formData.append("type", data.type);
       formData.append("description", data.description || "");
       formData.append("category", data.category);
+      formData.append("currency", data.currency);
       formData.append("transaction_date", data.transaction_date.toISOString());
 
       const result = await updateTransaction(transaction.id, formData);
@@ -185,10 +189,13 @@ export default function EditTransactionSheet({
             </div>
           </div>
 
+          {/* Currency Selector */}
+          <CurrencySelector control={control} name="currency" error={errors.currency?.message} />
+
           {/* Amount Input */}
           <div className="space-y-2">
             <Label htmlFor="edit-amount" className="text-base font-medium">
-              Amount (₹) <span className="text-red-500">*</span>
+              Amount ({SUPPORTED_CURRENCIES.find((c) => c.code === currency)?.symbol ?? "₹"}) <span className="text-red-500">*</span>
             </Label>
             <Input
               id="edit-amount"

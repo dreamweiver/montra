@@ -4,6 +4,7 @@ import {
   EXPENSE_CATEGORIES,
   INCOME_CATEGORIES,
   CURRENCY,
+  SUPPORTED_CURRENCIES,
   DATE_FORMATS,
   PAGINATION,
   CATEGORY_EMOJIS,
@@ -126,6 +127,38 @@ describe("Constants", () => {
       expect(FREQUENCY_LABELS.weekly).toBe("Weekly");
       expect(FREQUENCY_LABELS.monthly).toBe("Monthly");
       expect(FREQUENCY_LABELS.yearly).toBe("Yearly");
+    });
+  });
+
+  describe("SUPPORTED_CURRENCIES", () => {
+    it("should contain at least 10 currencies", () => {
+      expect(SUPPORTED_CURRENCIES.length).toBeGreaterThanOrEqual(10);
+    });
+
+    it("should include INR as default", () => {
+      const inr = SUPPORTED_CURRENCIES.find((c) => c.code === "INR");
+      expect(inr).toBeDefined();
+      expect(inr?.symbol).toBe("₹");
+    });
+
+    it("should include USD", () => {
+      const usd = SUPPORTED_CURRENCIES.find((c) => c.code === "USD");
+      expect(usd).toBeDefined();
+      expect(usd?.symbol).toBe("$");
+    });
+
+    it("should have code, symbol, locale, and name for each currency", () => {
+      for (const c of SUPPORTED_CURRENCIES) {
+        expect(c.code).toBeTruthy();
+        expect(c.symbol).toBeTruthy();
+        expect(c.locale).toBeTruthy();
+        expect(c.name).toBeTruthy();
+      }
+    });
+
+    it("should have unique codes", () => {
+      const codes = SUPPORTED_CURRENCIES.map((c) => c.code);
+      expect(new Set(codes).size).toBe(codes.length);
     });
   });
 });

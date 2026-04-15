@@ -38,11 +38,12 @@ export const categories = pgTable("categories", {
 export const transactions = pgTable("transactions", {
   id: serial("id").primaryKey(),
   user_id: uuid("user_id").notNull(),                              // Supabase Auth user ID
-  amount: numeric("amount", { precision: 12, scale: 2 }).notNull(), // Up to ₹9,99,99,99,999.99
+  amount: numeric("amount", { precision: 12, scale: 2 }).notNull(), // Up to 9,99,99,99,999.99
   type: text("type").notNull(),                                     // "income" | "expense"
   description: text("description"),                                 // Optional description
   category: text("category"),                                       // Legacy: e.g., "Food", "Salary"
   category_id: integer("category_id"),                              // Links to categories table
+  currency: text("currency").default("INR").notNull(),              // Currency code
   transaction_date: timestamp("transaction_date").notNull(),        // When transaction occurred
   created_at: timestamp("created_at").defaultNow().notNull(),       // Record creation time
 });
@@ -63,6 +64,7 @@ export const recurringTransactions = pgTable("recurring_transactions", {
   description: text("description"),                                 // Optional description
   category: text("category"),                                       // Category name
   category_id: integer("category_id"),                              // Links to categories table
+  currency: text("currency").default("INR").notNull(),              // Currency code
   frequency: text("frequency").notNull(),                           // "daily" | "weekly" | "monthly" | "yearly"
   start_date: timestamp("start_date").notNull(),                    // When recurrence starts
   end_date: timestamp("end_date"),                                  // Optional end date

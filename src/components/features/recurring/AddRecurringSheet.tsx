@@ -23,8 +23,8 @@ import { toast } from "sonner";
 import { addRecurringTransaction } from "@/actions/recurring";
 import { getCategories } from "@/actions/categories";
 import { recurringTransactionSchema, type RecurringTransactionFormData } from "@/lib/validations";
-import { LoadingOverlay } from "@/components/shared";
-import { FREQUENCY_OPTIONS } from "@/lib/constants";
+import { LoadingOverlay, CurrencySelector } from "@/components/shared";
+import { FREQUENCY_OPTIONS, SUPPORTED_CURRENCIES } from "@/lib/constants";
 import type { Category } from "@/types";
 
 // =============================================================================
@@ -57,6 +57,7 @@ export default function AddRecurringSheet({ onSuccess }: AddRecurringSheetProps)
       type: "expense",
       description: "",
       category: "",
+      currency: "INR",
       frequency: "monthly",
       start_date: new Date(),
       end_date: null,
@@ -64,6 +65,7 @@ export default function AddRecurringSheet({ onSuccess }: AddRecurringSheetProps)
   });
 
   const type = watch("type");
+  const currency = watch("currency");
   const startDate = watch("start_date");
   const endDate = watch("end_date");
 
@@ -85,6 +87,7 @@ export default function AddRecurringSheet({ onSuccess }: AddRecurringSheetProps)
         type: data.type,
         description: data.description,
         category: data.category,
+        currency: data.currency,
         frequency: data.frequency,
         start_date: data.start_date,
         end_date: data.end_date,
@@ -150,7 +153,7 @@ export default function AddRecurringSheet({ onSuccess }: AddRecurringSheetProps)
 
           {/* Amount */}
           <div className="space-y-2">
-            <Label htmlFor="amount">Amount</Label>
+            <Label htmlFor="amount">Amount ({SUPPORTED_CURRENCIES.find((c) => c.code === currency)?.symbol ?? "₹"})</Label>
             <Input
               id="amount"
               type="number"
@@ -162,6 +165,9 @@ export default function AddRecurringSheet({ onSuccess }: AddRecurringSheetProps)
               <p className="text-sm text-red-500">{errors.amount.message}</p>
             )}
           </div>
+
+          {/* Currency */}
+          <CurrencySelector control={control} name="currency" error={errors.currency?.message} />
 
           {/* Category */}
           <div className="space-y-2">

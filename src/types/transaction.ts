@@ -19,6 +19,7 @@ export interface Transaction {
   type: TransactionType;
   description: string | null;
   category: string | null;
+  currency: string;                  // Currency code (e.g., "INR", "USD")
   transaction_date: string;          // ISO date string
   created_at: string;                // ISO date string
 }

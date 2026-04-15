@@ -25,8 +25,8 @@ import { toast } from "sonner";
 import { addTransaction } from "@/actions/transactions";
 import { getCategories } from "@/actions/categories";
 import { transactionSchema, type TransactionFormData } from "@/lib/validations";
-import { TRANSACTION_CATEGORIES } from "@/lib/constants";
-import { LoadingOverlay } from "@/components/shared";
+import { TRANSACTION_CATEGORIES, SUPPORTED_CURRENCIES } from "@/lib/constants";
+import { LoadingOverlay, CurrencySelector } from "@/components/shared";
 import type { Category } from "@/types";
 import { extractErrorMessage } from "@/lib/utils";
 
@@ -75,12 +75,14 @@ export default function AddTransactionSheet({ onSuccess }: AddTransactionSheetPr
       type: "expense",
       description: "",
       category: "",
+      currency: "INR",
       transaction_date: new Date(),
     },
   });
 
   // Watch field values for reactive UI updates (e.g., button highlighting)
   const type = watch("type");
+  const currency = watch("currency");
   const transactionDate = watch("transaction_date");
 
   // Fetch categories when type changes
@@ -109,6 +111,7 @@ export default function AddTransactionSheet({ onSuccess }: AddTransactionSheetPr
       formData.append("type", data.type);
       formData.append("description", data.description || "");
       formData.append("category", data.category);
+      formData.append("currency", data.currency);
       formData.append("transaction_date", data.transaction_date.toISOString());
 
       // Call server action to insert into database
@@ -191,11 +194,14 @@ export default function AddTransactionSheet({ onSuccess }: AddTransactionSheetPr
             </div>
           </div>
 
+          {/* ----- Currency Selector ----- */}
+          <CurrencySelector control={control} name="currency" error={errors.currency?.message} />
+
           {/* ----- Amount Input ----- */}
           {/* Uses register() for native input binding */}
           <div className="space-y-2">
             <Label htmlFor="amount" className="text-base font-medium">
-              Amount (₹) <span className="text-red-500">*</span>
+              Amount ({SUPPORTED_CURRENCIES.find((c) => c.code === currency)?.symbol ?? "₹"}) <span className="text-red-500">*</span>
             </Label>
             <Input
               id="amount"

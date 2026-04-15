@@ -98,7 +98,7 @@ export default function RecurringCard({
         {/* Center: Dates & Amount */}
         <div className="text-right mr-4">
           <p className={`font-semibold ${isExpense ? "text-rose-600" : "text-emerald-600"}`}>
-            {isExpense ? "-" : "+"}{formatCurrency(recurring.amount)}
+            {isExpense ? "-" : "+"}{formatCurrency(recurring.amount, recurring.currency)}
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">
             Next: {formatDateUTC(recurring.next_date)}

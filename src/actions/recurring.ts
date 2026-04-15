@@ -51,6 +51,7 @@ export async function addRecurringTransaction(data: {
   type: string;
   description?: string;
   category: string;
+  currency?: string;
   frequency: string;
   start_date: Date;
   end_date?: Date | null;
@@ -61,13 +62,14 @@ export async function addRecurringTransaction(data: {
 
     const startDateStr = toDateString(data.start_date);
     const endDateStr = data.end_date ? toDateString(data.end_date) : null;
+    const currency = data.currency || "INR";
 
     await sql`
       INSERT INTO recurring_transactions (
-        user_id, amount, type, description, category,
+        user_id, amount, type, description, category, currency,
         frequency, start_date, end_date, next_date, is_active
       ) VALUES (
-        ${user.id}, ${data.amount}, ${data.type}, ${data.description || null}, ${data.category},
+        ${user.id}, ${data.amount}, ${data.type}, ${data.description || null}, ${data.category}, ${currency},
         ${data.frequency}, ${startDateStr}, ${endDateStr},
         ${startDateStr}, true
       )
@@ -91,6 +93,7 @@ export async function updateRecurringTransaction(
     type: string;
     description?: string;
     category: string;
+    currency?: string;
     frequency: string;
     start_date: Date;
     end_date?: Date | null;
@@ -103,6 +106,7 @@ export async function updateRecurringTransaction(
 
     const startDateStr = toDateString(data.start_date);
     const endDateStr = data.end_date ? toDateString(data.end_date) : null;
+    const currency = data.currency || "INR";
 
     await sql`
       UPDATE recurring_transactions
@@ -111,6 +115,7 @@ export async function updateRecurringTransaction(
         type = ${data.type},
         description = ${data.description || null},
         category = ${data.category},
+        currency = ${currency},
         frequency = ${data.frequency},
         start_date = ${startDateStr},
         end_date = ${endDateStr},
@@ -203,10 +208,10 @@ export async function processDueRecurringTransactions() {
         // Create the actual transaction
         await sql`
           INSERT INTO transactions (
-            user_id, amount, type, description, category, transaction_date
+            user_id, amount, type, description, category, currency, transaction_date
           ) VALUES (
             ${user.id}, ${item.amount}, ${item.type},
-            ${item.description}, ${item.category},
+            ${item.description}, ${item.category}, ${item.currency || "INR"},
             ${toDateString(nextDate)}
           )
         `;

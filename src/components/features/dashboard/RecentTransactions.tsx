@@ -21,6 +21,7 @@ interface Transaction {
   description: string | null;
   category: string | null;
   transaction_date: string;
+  currency?: string;
   category_icon?: string | null;
   category_color?: string | null;
 }
@@ -92,7 +93,7 @@ export default function RecentTransactions({
               }`}
             >
               {tx.type === "income" ? "+" : "-"}
-              {formatCurrency(parseFloat(tx.amount))}
+              {formatCurrency(parseFloat(tx.amount), tx.currency)}
             </p>
           </div>
         ))}

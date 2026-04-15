@@ -353,6 +353,7 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { LogOut, Home, CreditCard, TrendingUp, Settings, Menu, FolderOpen, CalendarClock } from "lucide-react";
+import { ThemeToggle } from "@/components/shared";
 
 export default function DashboardLayout({
   children,
@@ -453,7 +454,7 @@ export default function DashboardLayout({
           <div className="p-4 border-t">
             <Button 
               variant="ghost" 
-              className="w-full justify-start text-red-600 hover:bg-red-50"
+              className="w-full justify-start text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
               onClick={handleLogout}
             >
               <LogOut className="mr-3 h-5 w-5" />
@@ -479,6 +480,7 @@ export default function DashboardLayout({
           </div>
 
           <div className="flex items-center gap-4">
+            <ThemeToggle />
             <div className="text-sm text-muted-foreground">
               Welcome back
             </div>

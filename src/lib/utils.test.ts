@@ -47,6 +47,22 @@ describe("formatCurrency", () => {
     const result = formatCurrency(1000000);
     expect(result).toContain("10,00,000");
   });
+
+  it("should format with USD currency code", () => {
+    const result = formatCurrency(1000, "USD");
+    expect(result).toContain("1,000");
+    expect(result).toContain("$");
+  });
+
+  it("should format with EUR currency code", () => {
+    const result = formatCurrency(500, "EUR");
+    expect(result).toContain("500");
+  });
+
+  it("should fall back to default currency for unknown code", () => {
+    const result = formatCurrency(100, "XYZ");
+    expect(result).toContain("100");
+  });
 });
 
 describe("extractErrorMessage", () => {

@@ -23,8 +23,8 @@ import { toast } from "sonner";
 import { updateRecurringTransaction } from "@/actions/recurring";
 import { getCategories } from "@/actions/categories";
 import { recurringTransactionSchema, type RecurringTransactionFormData } from "@/lib/validations";
-import { LoadingOverlay } from "@/components/shared";
-import { FREQUENCY_OPTIONS } from "@/lib/constants";
+import { LoadingOverlay, CurrencySelector } from "@/components/shared";
+import { FREQUENCY_OPTIONS, SUPPORTED_CURRENCIES } from "@/lib/constants";
 import type { Category, RecurringTransaction } from "@/types";
 
 // =============================================================================
@@ -63,6 +63,7 @@ export default function EditRecurringSheet({
       type: "expense",
       description: "",
       category: "",
+      currency: "INR",
       frequency: "monthly",
       start_date: new Date(),
       end_date: null,
@@ -70,6 +71,7 @@ export default function EditRecurringSheet({
   });
 
   const type = watch("type");
+  const currency = watch("currency");
   const startDate = watch("start_date");
   const endDate = watch("end_date");
 
@@ -80,6 +82,7 @@ export default function EditRecurringSheet({
       setValue("type", recurring.type);
       setValue("description", recurring.description || "");
       setValue("category", recurring.category || "");
+      setValue("currency", recurring.currency || "INR");
       setValue("frequency", recurring.frequency);
       setValue("start_date", new Date(recurring.start_date));
       setValue("end_date", recurring.end_date ? new Date(recurring.end_date) : null);
@@ -105,6 +108,7 @@ export default function EditRecurringSheet({
         type: data.type,
         description: data.description,
         category: data.category,
+        currency: data.currency,
         frequency: data.frequency,
         start_date: data.start_date,
         end_date: data.end_date,
@@ -162,7 +166,7 @@ export default function EditRecurringSheet({
 
           {/* Amount */}
           <div className="space-y-2">
-            <Label htmlFor="edit-amount">Amount</Label>
+            <Label htmlFor="edit-amount">Amount ({SUPPORTED_CURRENCIES.find((c) => c.code === currency)?.symbol ?? "₹"})</Label>
             <Input
               id="edit-amount"
               type="number"
@@ -174,6 +178,9 @@ export default function EditRecurringSheet({
               <p className="text-sm text-red-500">{errors.amount.message}</p>
             )}
           </div>
+
+          {/* Currency */}
+          <CurrencySelector control={control} name="currency" error={errors.currency?.message} />
 
           {/* Category */}
           <div className="space-y-2">

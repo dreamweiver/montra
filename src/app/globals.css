@@ -172,6 +172,23 @@
   --tremor-ring-DEFAULT: rgba(59, 130, 246, 0.5);
 }
 
+.dark {
+  --tremor-content-subtle: #9ca3af;
+  --tremor-content-DEFAULT: #d1d5db;
+  --tremor-content-emphasis: #f3f4f6;
+  --tremor-content-strong: #f9fafb;
+  --tremor-content-inverted: #030712;
+
+  --tremor-border-DEFAULT: #374151;
+
+  --tremor-background-muted: #1f2937;
+  --tremor-background-subtle: #374151;
+  --tremor-background-DEFAULT: #111827;
+  --tremor-background-emphasis: #d1d5db;
+
+  --tremor-ring-DEFAULT: rgba(59, 130, 246, 0.5);
+}
+
 /* Tremor bar/chart fill colors */
 [data-testid="bar-chart"] [fill],
 .recharts-bar-rectangle [fill] {

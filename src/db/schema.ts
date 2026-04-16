@@ -88,3 +88,19 @@ export const userSettings = pgTable("user_settings", {
   created_at: timestamp("created_at").defaultNow().notNull(),        // Record creation time
   updated_at: timestamp("updated_at").defaultNow().notNull(),        // Last update time
 });
+
+// =============================================================================
+// Budgets Table
+// =============================================================================
+// Stores per-user monthly spending budget (one row per user).
+// - monthly_limit: Maximum spending amount for the month
+// - currency: Currency for the budget amount
+// =============================================================================
+export const budgets = pgTable("budgets", {
+  id: serial("id").primaryKey(),
+  user_id: uuid("user_id").notNull().unique(),                         // Supabase Auth user ID (one per user)
+  monthly_limit: numeric("monthly_limit", { precision: 12, scale: 2 }).notNull(), // Budget cap
+  currency: text("currency").default("INR").notNull(),                 // Currency code
+  created_at: timestamp("created_at").defaultNow().notNull(),          // Record creation time
+  updated_at: timestamp("updated_at").defaultNow().notNull(),          // Last update time
+});

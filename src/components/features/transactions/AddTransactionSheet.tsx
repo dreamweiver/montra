@@ -25,6 +25,7 @@ import { toast } from "sonner";
 import { addTransaction } from "@/actions/transactions";
 import { getCategories } from "@/actions/categories";
 import { getUserSettings } from "@/actions/settings";
+import { checkBudgetStatus } from "@/actions/budgets";
 import { transactionSchema, type TransactionFormData } from "@/lib/validations";
 import { TRANSACTION_CATEGORIES, SUPPORTED_CURRENCIES } from "@/lib/constants";
 import { LoadingOverlay, CurrencySelector } from "@/components/shared";
@@ -138,6 +139,23 @@ export default function AddTransactionSheet({ onSuccess }: AddTransactionSheetPr
       reset();
       setOpen(false);
       onSuccess?.();
+
+      // Check budget status after adding an expense
+      if (data.type === "expense") {
+        const budgetResult = await checkBudgetStatus();
+        if (budgetResult.success && budgetResult.data?.hasBudget) {
+          const pct = budgetResult.data.percentage;
+          if (pct >= 100) {
+            toast.error("You've exceeded your monthly budget!", {
+              description: `${pct}% of your budget has been used.`,
+            });
+          } else if (pct >= 80) {
+            toast.warning("You're approaching your budget limit", {
+              description: `${pct}% of your monthly budget has been used.`,
+            });
+          }
+        }
+      }
 
     } catch (error: unknown) {
       const message = extractErrorMessage(error);

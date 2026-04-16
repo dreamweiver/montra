@@ -24,6 +24,7 @@ import { CalendarIcon, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { addTransaction } from "@/actions/transactions";
 import { getCategories } from "@/actions/categories";
+import { getUserSettings } from "@/actions/settings";
 import { transactionSchema, type TransactionFormData } from "@/lib/validations";
 import { TRANSACTION_CATEGORIES, SUPPORTED_CURRENCIES } from "@/lib/constants";
 import { LoadingOverlay, CurrencySelector } from "@/components/shared";
@@ -76,7 +77,7 @@ export default function AddTransactionSheet({ onSuccess }: AddTransactionSheetPr
       description: "",
       category: "",
       currency: "INR",
-      transaction_date: new Date(),
+      transaction_date: undefined as unknown as Date,
     },
   });
 
@@ -84,6 +85,16 @@ export default function AddTransactionSheet({ onSuccess }: AddTransactionSheetPr
   const type = watch("type");
   const currency = watch("currency");
   const transactionDate = watch("transaction_date");
+
+  // Load user's default currency preference and set today's date on mount
+  useEffect(() => {
+    setValue("transaction_date", new Date());
+    getUserSettings().then((result) => {
+      if (result.success && result.data) {
+        setValue("currency", result.data.default_currency);
+      }
+    });
+  }, [setValue]);
 
   // Fetch categories when type changes
   useEffect(() => {
@@ -152,12 +163,12 @@ export default function AddTransactionSheet({ onSuccess }: AddTransactionSheetPr
         </Button>
       </SheetTrigger>
 
-      <SheetContent className="sm:max-w-lg p-8 overflow-hidden">
+      <SheetContent className="sm:max-w-lg p-6 overflow-y-auto">
         {/* Loading Overlay */}
         {loading && <LoadingOverlay message="Adding transaction" />}
 
         {/* Sheet Header */}
-        <SheetHeader className="mb-8">
+        <SheetHeader className="mb-4">
           <SheetTitle className="text-2xl">Add New Transaction</SheetTitle>
           <SheetDescription>Enter the details of your income or expense</SheetDescription>
         </SheetHeader>
@@ -166,19 +177,19 @@ export default function AddTransactionSheet({ onSuccess }: AddTransactionSheetPr
         {/* Transaction Form                                                  */}
         {/* handleSubmit wraps onSubmit with zod validation                  */}
         {/* ----------------------------------------------------------------- */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Fieldset disables all inputs while loading */}
-          <fieldset disabled={loading} className="space-y-6">
+          <fieldset disabled={loading} className="space-y-4">
           
           {/* ----- Type Selection (Income/Expense) ----- */}
           {/* Uses setValue to update form state on button click */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <Label className="text-base font-medium">Type</Label>
             <div className="flex gap-3">
               <Button
                 type="button"
                 variant={type === "expense" ? "default" : "outline"}
-                className="flex-1 py-6 text-base"
+                className="flex-1 py-4 text-base"
                 onClick={() => setValue("type", "expense")}
               >
                 Expense
@@ -186,7 +197,7 @@ export default function AddTransactionSheet({ onSuccess }: AddTransactionSheetPr
               <Button
                 type="button"
                 variant={type === "income" ? "default" : "outline"}
-                className="flex-1 py-6 text-base"
+                className="flex-1 py-4 text-base"
                 onClick={() => setValue("type", "income")}
               >
                 Income
@@ -224,7 +235,7 @@ export default function AddTransactionSheet({ onSuccess }: AddTransactionSheetPr
               id="description"
               placeholder="What was this transaction for? (optional)"
               {...register("description")}
-              className="min-h-[80px] text-base"
+              className="min-h-[60px] text-base"
             />
           </div>
 
@@ -298,7 +309,7 @@ export default function AddTransactionSheet({ onSuccess }: AddTransactionSheetPr
             />
           </div>
 
-          <Button type="submit" className="w-full h-12 text-base mt-6" disabled={loading}>
+          <Button type="submit" className="w-full h-12 text-base mt-2" disabled={loading}>
             Add Transaction
           </Button>
           </fieldset>

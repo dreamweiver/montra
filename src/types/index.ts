@@ -29,3 +29,5 @@ export type {
 } from "./recurring";
 
 export type { ApiResponse } from "./api";
+
+export type { UserSettings } from "./settings";

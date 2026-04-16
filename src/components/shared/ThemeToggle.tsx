@@ -17,8 +17,9 @@ export default function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <Button variant="ghost" size="icon" className="h-9 w-9" disabled>
+      <Button variant="outline" size="sm" className="h-9" disabled>
         <Sun className="h-4 w-4" />
+        Light
       </Button>
     );
   }
@@ -26,14 +27,18 @@ export default function ThemeToggle() {
   const isDark = resolvedTheme === "dark";
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
-      className="h-9 w-9"
+    <button
+      type="button"
+      className="inline-flex items-center gap-2 rounded-md border px-3 h-9 text-sm font-medium cursor-pointer transition-colors"
+      style={
+        isDark
+          ? { backgroundColor: "#ffffff", color: "#000000", borderColor: "#d1d5db" }
+          : { backgroundColor: "#111827", color: "#ffffff", borderColor: "#374151" }
+      }
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      title={isDark ? "Switch to light mode" : "Switch to dark mode"}
     >
       {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-    </Button>
+      {isDark ? "Light" : "Dark"}
+    </button>
   );
 }

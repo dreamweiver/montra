@@ -5,7 +5,7 @@
 // Each table is defined using pgTable() and exported for use.
 // =============================================================================
 
-import { pgTable, serial, text, numeric, timestamp, uuid, integer, boolean } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, numeric, timestamp, uuid, integer, boolean, unique } from "drizzle-orm/pg-core";
 
 // =============================================================================
 // Categories Table
@@ -71,4 +71,20 @@ export const recurringTransactions = pgTable("recurring_transactions", {
   next_date: timestamp("next_date").notNull(),                      // Next generation date
   is_active: boolean("is_active").default(true).notNull(),          // Active flag
   created_at: timestamp("created_at").defaultNow().notNull(),       // Record creation time
+});
+
+// =============================================================================
+// User Settings Table
+// =============================================================================
+// Stores per-user preferences (one row per user).
+// - default_currency: Preferred currency for new transactions
+// - date_format: Preferred date display format
+// =============================================================================
+export const userSettings = pgTable("user_settings", {
+  id: serial("id").primaryKey(),
+  user_id: uuid("user_id").notNull().unique(),                       // Supabase Auth user ID (one per user)
+  default_currency: text("default_currency").default("INR").notNull(), // Preferred currency code
+  date_format: text("date_format").default("dd/MM/yyyy").notNull(),  // Preferred date format
+  created_at: timestamp("created_at").defaultNow().notNull(),        // Record creation time
+  updated_at: timestamp("updated_at").defaultNow().notNull(),        // Last update time
 });

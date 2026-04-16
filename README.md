@@ -21,7 +21,12 @@ A modern, sleek personal finance app built with Next.js 16, designed to help you
 
 - 🔐 **Secure Authentication** — Powered by Supabase Auth
 - 💸 **Track Transactions** — Log income and expenses with categories
-- 📊 **Dashboard Analytics** — Real-time financial overview *(coming soon)*
+- 📊 **Dashboard Analytics** — Real-time stats, summary cards, and charts
+- 🔍 **Filter & Search** — Multi-criteria filtering with date range presets
+- 🔄 **Recurring Transactions** — Auto-generated daily, weekly, monthly, or yearly entries
+- 💱 **Multi-Currency Support** — 11 currencies (INR, USD, EUR, GBP, JPY, and more)
+- 🏷️ **Category Management** — Custom income & expense categories with icons and colors
+- 🌗 **Dark/Light Theme** — System-aware toggle with persistent preference
 - 📱 **Responsive Design** — Works beautifully on all devices
 - ⚡ **Blazing Fast** — Built on Next.js App Router with React Server Components
 - 🎨 **Modern UI** — Clean interface with shadcn/ui components
@@ -178,24 +183,21 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ### ✅ Completed
 - [x] User authentication (Supabase)
-- [x] Add transactions with categories
-- [x] View transactions list
-- [x] Delete transactions
-- [x] Edit transactions
-
-### 🚧 In Progress
-- [ ] Dashboard with real stats & summary cards
-- [ ] Charts & analytics (Recharts)
+- [x] Add, edit, and delete transactions with categories
+- [x] Dashboard with real-time stats & summary cards
+- [x] Charts & analytics (Recharts + Tremor)
+- [x] Filter & search transactions (date range, type, category)
+- [x] Custom category management (income & expense)
+- [x] Recurring transactions (daily, weekly, monthly, yearly)
+- [x] Multi-currency support (11 currencies)
+- [x] Dark/Light theme toggle with system detection
 
 ### 📋 Planned
-- [ ] Filter & search transactions
-- [ ] Investments tracking page
-- [ ] Settings page (profile, preferences)
+
+- [ ] Settings page (profile, preferences, default currency)
 - [ ] Export transactions to CSV
-- [ ] Dark/Light theme toggle
 - [ ] Budget goals & alerts
-- [ ] Recurring transactions
-- [ ] Multi-currency support
+- [ ] Investments tracking page
 
 ---
 

@@ -444,7 +444,11 @@ export default function DashboardLayout({
               {sidebarOpen && "Investments"}
             </Button>
 
-            <Button variant="ghost" className="w-full justify-start">
+            <Button
+              variant="ghost"
+              className="w-full justify-start"
+              onClick={() => router.push("/dashboard/settings")}
+            >
               <Settings className="mr-3 h-5 w-5" />
               {sidebarOpen && "Settings"}
             </Button>

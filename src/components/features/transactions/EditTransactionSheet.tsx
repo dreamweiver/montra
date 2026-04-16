@@ -75,7 +75,7 @@ export default function EditTransactionSheet({
       description: "",
       category: "",
       currency: "INR",
-      transaction_date: new Date(),
+      transaction_date: undefined as unknown as Date,
     },
   });
 
@@ -152,28 +152,28 @@ export default function EditTransactionSheet({
   // =============================================================================
   return (
     <Sheet open={open} onOpenChange={(isOpen) => !loading && onOpenChange(isOpen)}>
-      <SheetContent className="sm:max-w-lg p-8 overflow-hidden">
+      <SheetContent className="sm:max-w-lg p-6 overflow-y-auto">
         {/* Loading Overlay */}
         {loading && <LoadingOverlay message="Updating transaction" />}
 
         {/* Sheet Header */}
-        <SheetHeader className="mb-8">
+        <SheetHeader className="mb-4">
           <SheetTitle className="text-2xl">Edit Transaction</SheetTitle>
           <SheetDescription>Update the details of your transaction</SheetDescription>
         </SheetHeader>
 
         {/* Transaction Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-          <fieldset disabled={loading} className="space-y-6">
-          
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <fieldset disabled={loading} className="space-y-4">
+
           {/* Type Selection */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <Label className="text-base font-medium">Type</Label>
             <div className="flex gap-3">
               <Button
                 type="button"
                 variant={type === "expense" ? "default" : "outline"}
-                className="flex-1 py-6 text-base"
+                className="flex-1 py-4 text-base"
                 onClick={() => setValue("type", "expense")}
               >
                 Expense
@@ -181,7 +181,7 @@ export default function EditTransactionSheet({
               <Button
                 type="button"
                 variant={type === "income" ? "default" : "outline"}
-                className="flex-1 py-6 text-base"
+                className="flex-1 py-4 text-base"
                 onClick={() => setValue("type", "income")}
               >
                 Income
@@ -217,7 +217,7 @@ export default function EditTransactionSheet({
               id="edit-description"
               placeholder="What was this transaction for? (optional)"
               {...register("description")}
-              className="min-h-[80px] text-base"
+              className="min-h-[60px] text-base"
             />
           </div>
 
@@ -289,7 +289,7 @@ export default function EditTransactionSheet({
             />
           </div>
 
-          <Button type="submit" className="w-full h-12 text-base mt-6" disabled={loading}>
+          <Button type="submit" className="w-full h-12 text-base mt-2" disabled={loading}>
             Update Transaction
           </Button>
           </fieldset>

@@ -85,6 +85,13 @@ export const DATE_FORMATS = {
   monthYear: "MMMM yyyy",       // April 2026
 } as const;
 
+// User-selectable date format options for Settings
+export const DATE_FORMAT_OPTIONS = [
+  { value: "dd/MM/yyyy", label: "DD/MM/YYYY", example: "31/12/2026" },
+  { value: "MM/dd/yyyy", label: "MM/DD/YYYY", example: "12/31/2026" },
+  { value: "yyyy-MM-dd", label: "YYYY-MM-DD", example: "2026-12-31" },
+] as const;
+
 // ---------------------------------------------
 // Pagination
 // ---------------------------------------------

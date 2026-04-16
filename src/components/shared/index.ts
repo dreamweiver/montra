@@ -10,3 +10,4 @@ export { default as EmptyState } from "./EmptyState";
 export { default as ConfirmDialog } from "./ConfirmDialog";
 export { default as ThemeToggle } from "./ThemeToggle";
 export { default as CurrencySelector } from "./CurrencySelector";
+export { default as BudgetIndicator } from "./BudgetIndicator";

@@ -7,7 +7,7 @@
 // =============================================================================
 
 import { useState, useEffect, useCallback } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Target } from "lucide-react";
 import {
   getDashboardStats,
   getSpendingByCategory,
@@ -17,12 +17,15 @@ import {
   type CategorySpending,
   type MonthlyTrend,
 } from "@/actions/stats";
+import { checkBudgetStatus } from "@/actions/budgets";
+import { formatCurrency } from "@/lib/utils";
 import {
   StatsCards,
   SpendingChart,
   MonthlyTrendChart,
   RecentTransactions,
 } from "@/components/features/dashboard";
+import type { BudgetStatus } from "@/types";
 
 // =============================================================================
 // Types
@@ -31,6 +34,7 @@ interface DashboardData {
   stats: DashboardStats;
   spending: CategorySpending[];
   trend: MonthlyTrend[];
+  budgetStatus: BudgetStatus | null;
   recentTransactions: Array<{
     id: number;
     amount: string;
@@ -54,17 +58,19 @@ export default function DashboardPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [stats, spending, trend, recentTransactions] = await Promise.all([
+      const [stats, spending, trend, recentTransactions, budgetResult] = await Promise.all([
         getDashboardStats(),
         getSpendingByCategory(),
         getMonthlyTrend(),
         getRecentTransactions(5),
+        checkBudgetStatus(),
       ]);
 
       setData({
         stats,
         spending,
         trend,
+        budgetStatus: budgetResult.success && budgetResult.data?.hasBudget ? budgetResult.data : null,
         recentTransactions: recentTransactions as DashboardData["recentTransactions"],
       });
     } catch (error) {
@@ -110,6 +116,39 @@ export default function DashboardPage() {
           balance={data.stats.balance}
           transactionCount={data.stats.transactionCount}
         />
+      )}
+
+      {/* Budget Progress */}
+      {data?.budgetStatus && (
+        <div className="rounded-lg border bg-card p-4">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Target className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Monthly Budget</span>
+            </div>
+            <span className={`text-sm font-medium ${
+              data.budgetStatus.percentage >= 100 ? "text-red-600" :
+              data.budgetStatus.percentage >= 80 ? "text-orange-600" :
+              "text-green-600"
+            }`}>
+              {data.budgetStatus.percentage}%
+            </span>
+          </div>
+          <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ${
+                data.budgetStatus.percentage >= 100 ? "bg-red-500" :
+                data.budgetStatus.percentage >= 80 ? "bg-orange-500" :
+                data.budgetStatus.percentage >= 60 ? "bg-yellow-500" :
+                "bg-green-500"
+              }`}
+              style={{ width: `${Math.min(data.budgetStatus.percentage, 100)}%` }}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            {formatCurrency(data.budgetStatus.spent, data.budgetStatus.currency)} of {formatCurrency(data.budgetStatus.limit, data.budgetStatus.currency)} spent
+          </p>
+        </div>
       )}
 
       {/* Charts Row */}

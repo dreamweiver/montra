@@ -352,8 +352,8 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { LogOut, Home, CreditCard, TrendingUp, Settings, Menu, FolderOpen, CalendarClock } from "lucide-react";
-import { ThemeToggle } from "@/components/shared";
+import { LogOut, Home, CreditCard, TrendingUp, Settings, Menu, FolderOpen, CalendarClock, Target } from "lucide-react";
+import { ThemeToggle, BudgetIndicator } from "@/components/shared";
 
 export default function DashboardLayout({
   children,
@@ -405,7 +405,7 @@ export default function DashboardLayout({
           <nav className="flex-1 p-4 space-y-2">
            <Button 
             variant="ghost" 
-            className="w-full justify-start"
+            className="w-full justify-start cursor-pointer"
             onClick={() => router.push("/dashboard")}
           >
             <Home className="mr-3 h-5 w-5" />
@@ -414,7 +414,7 @@ export default function DashboardLayout({
 
             <Button 
               variant="ghost" 
-              className="w-full justify-start"
+              className="w-full justify-start cursor-pointer"
               onClick={() => router.push("/dashboard/transactions")}
             >
               <CreditCard className="mr-3 h-5 w-5" />
@@ -423,7 +423,7 @@ export default function DashboardLayout({
 
             <Button 
               variant="ghost" 
-              className="w-full justify-start"
+              className="w-full justify-start cursor-pointer"
               onClick={() => router.push("/dashboard/categories")}
             >
               <FolderOpen className="mr-3 h-5 w-5" />
@@ -432,21 +432,30 @@ export default function DashboardLayout({
 
             <Button 
               variant="ghost" 
-              className="w-full justify-start"
+              className="w-full justify-start cursor-pointer"
               onClick={() => router.push("/dashboard/recurring")}
             >
               <CalendarClock className="mr-3 h-5 w-5" />
               {sidebarOpen && "Recurring"}
             </Button>
 
-            <Button variant="ghost" className="w-full justify-start">
+            <Button
+              variant="ghost"
+              className="w-full justify-start cursor-pointer"
+              onClick={() => router.push("/dashboard/budgets")}
+            >
+              <Target className="mr-3 h-5 w-5" />
+              {sidebarOpen && "Budgets"}
+            </Button>
+
+            <Button variant="ghost" className="w-full justify-start cursor-pointer">
               <TrendingUp className="mr-3 h-5 w-5" />
               {sidebarOpen && "Investments"}
             </Button>
 
             <Button
               variant="ghost"
-              className="w-full justify-start"
+              className="w-full justify-start cursor-pointer"
               onClick={() => router.push("/dashboard/settings")}
             >
               <Settings className="mr-3 h-5 w-5" />
@@ -484,6 +493,7 @@ export default function DashboardLayout({
           </div>
 
           <div className="flex items-center gap-4">
+            <BudgetIndicator />
             <ThemeToggle />
             <div className="text-sm text-muted-foreground">
               Welcome back

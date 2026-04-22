@@ -148,3 +148,18 @@ export const FREQUENCY_LABELS: Record<string, string> = {
   monthly: "Monthly",
   yearly: "Yearly",
 };
+
+// ---------------------------------------------
+// Investment Types
+// ---------------------------------------------
+export const INVESTMENT_TYPES = [
+  { value: "stock", label: "Stock" },
+  { value: "mutual_fund", label: "Mutual Fund" },
+  { value: "fixed_deposit", label: "Fixed Deposit" },
+  { value: "gold", label: "Gold" },
+  { value: "crypto", label: "Crypto" },
+  { value: "bond", label: "Bond" },
+  { value: "real_estate", label: "Real Estate" },
+] as const;
+
+export const LIVE_FETCH_TYPES: readonly string[] = ["stock", "mutual_fund", "crypto"];

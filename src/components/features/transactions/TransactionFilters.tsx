@@ -94,19 +94,19 @@ export default function TransactionFiltersComponent({
     filters.search.length > 0;
 
   return (
-    <div className="flex flex-wrap items-center gap-3 p-4 bg-muted/30 rounded-lg">
+    <div className="flex flex-col gap-3 p-3 md:p-4 bg-muted/30 rounded-lg md:flex-row md:flex-wrap md:items-center">
       {/* Search Input */}
-      <div className="relative">
+      <div className="relative w-full md:w-auto">
         <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           placeholder="Search transactions..."
           value={filters.search}
           onChange={(e) => updateFilter("search", e.target.value)}
-          className="h-9 w-[200px] pl-8"
+          className="h-9 w-full md:w-[200px] pl-8"
         />
       </div>
 
-      <div className="w-px h-6 bg-border mx-2" />
+      <div className="hidden md:block w-px h-6 bg-border mx-2" />
 
       {/* Date Range Presets */}
       <div className="flex flex-wrap gap-2">
@@ -115,6 +115,7 @@ export default function TransactionFiltersComponent({
             key={preset.label}
             variant="outline"
             size="sm"
+            className="flex-shrink-0"
             onClick={() => applyPreset(preset)}
           >
             {preset.label}
@@ -122,78 +123,84 @@ export default function TransactionFiltersComponent({
         ))}
       </div>
 
-      <div className="w-px h-6 bg-border mx-2" />
+      <div className="hidden md:block w-px h-6 bg-border mx-2" />
 
-      {/* Start Date */}
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="min-w-[130px]">
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {filters.startDate ? format(filters.startDate, "dd MMM yy") : "From"}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={filters.startDate}
-            onSelect={(date) => updateFilter("startDate", date)}
-            initialFocus
-          />
-        </PopoverContent>
-      </Popover>
+      {/* Date Range Pickers */}
+      <div className="flex gap-2 w-full md:w-auto">
+        {/* Start Date */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="flex-1 md:flex-none md:min-w-[130px]">
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {filters.startDate ? format(filters.startDate, "dd MMM yy") : "From"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={filters.startDate}
+              onSelect={(date) => updateFilter("startDate", date)}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
 
-      {/* End Date */}
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button variant="outline" size="sm" className="min-w-[130px]">
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {filters.endDate ? format(filters.endDate, "dd MMM yy") : "To"}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
-          <Calendar
-            mode="single"
-            selected={filters.endDate}
-            onSelect={(date) => updateFilter("endDate", date)}
-            initialFocus
-          />
-        </PopoverContent>
-      </Popover>
+        {/* End Date */}
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" size="sm" className="flex-1 md:flex-none md:min-w-[130px]">
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {filters.endDate ? format(filters.endDate, "dd MMM yy") : "To"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={filters.endDate}
+              onSelect={(date) => updateFilter("endDate", date)}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
 
-      <div className="w-px h-6 bg-border mx-2" />
+      <div className="hidden md:block w-px h-6 bg-border mx-2" />
 
-      {/* Type Filter */}
-      <Select
-        value={filters.type}
-        onValueChange={(value) => updateFilter("type", value as TransactionType | "all")}
-      >
-        <SelectTrigger className="w-[120px] h-9">
-          <SelectValue placeholder="Type" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Types</SelectItem>
-          <SelectItem value="income">Income</SelectItem>
-          <SelectItem value="expense">Expense</SelectItem>
-        </SelectContent>
-      </Select>
+      {/* Type & Category Filters */}
+      <div className="flex gap-2 w-full md:w-auto">
+        {/* Type Filter */}
+        <Select
+          value={filters.type}
+          onValueChange={(value) => updateFilter("type", value as TransactionType | "all")}
+        >
+          <SelectTrigger className="w-full md:w-[120px] h-9">
+            <SelectValue placeholder="Type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Types</SelectItem>
+            <SelectItem value="income">Income</SelectItem>
+            <SelectItem value="expense">Expense</SelectItem>
+          </SelectContent>
+        </Select>
 
-      {/* Category Filter */}
-      <Select
-        value={filters.category}
-        onValueChange={(value) => updateFilter("category", value)}
-      >
-        <SelectTrigger className="w-[150px] h-9">
-          <SelectValue placeholder="Category" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Categories</SelectItem>
-          {categories.map((cat) => (
-            <SelectItem key={cat.id} value={cat.name}>
-              {cat.icon} {cat.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        {/* Category Filter */}
+        <Select
+          value={filters.category}
+          onValueChange={(value) => updateFilter("category", value)}
+        >
+          <SelectTrigger className="w-full md:w-[150px] h-9">
+            <SelectValue placeholder="Category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {categories.map((cat) => (
+              <SelectItem key={cat.id} value={cat.name}>
+                {cat.icon} {cat.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
       {/* Clear Filters */}
       {hasActiveFilters && (

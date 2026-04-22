@@ -180,21 +180,21 @@ export default function TransactionsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Transactions</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">Transactions</h1>
           <p className="text-muted-foreground">Manage your income and expenses</p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {/* Export CSV */}
           <Button
             variant="outline"
             onClick={handleExportCSV}
             disabled={loading || filteredTransactions.length === 0}
           >
-            <Download className="mr-2 h-4 w-4" />
-            Export CSV
+            <Download className="h-4 w-4 md:mr-2" />
+            <span className="hidden md:inline">Export CSV</span>
           </Button>
 
           {/* Toggle Chart/List View */}
@@ -276,50 +276,49 @@ export default function TransactionsPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-3 px-4">Date</th>
-                    <th className="text-left py-3 px-4">Description</th>
-                    <th className="text-left py-3 px-4">Category</th>
-                    <th className="text-right py-3 px-4">Amount</th>
-                    <th className="text-right py-3 px-4 w-24">Actions</th>
+                    <th className="text-left py-2 px-2 md:py-3 md:px-4">Date</th>
+                    <th className="text-left py-2 px-2 md:py-3 md:px-4">Description</th>
+                    <th className="hidden sm:table-cell text-left py-2 px-2 md:py-3 md:px-4">Category</th>
+                    <th className="text-right py-2 px-2 md:py-3 md:px-4">Amount</th>
+                    <th className="text-right py-2 px-2 md:py-3 md:px-4 w-16 md:w-24">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredTransactions.map((tx) => (
                     <tr key={tx.id} className="border-b hover:bg-muted/50">
-                      <td className="py-3 px-4">
-                        {format(new Date(tx.transaction_date), "dd MMM yyyy")}
+                      <td className="py-2 px-2 md:py-3 md:px-4 whitespace-nowrap">
+                        <span className="md:hidden">{format(new Date(tx.transaction_date), "dd/MM")}</span>
+                        <span className="hidden md:inline">{format(new Date(tx.transaction_date), "dd MMM yyyy")}</span>
                       </td>
-                      <td className="py-3 px-4">{tx.description || "-"}</td>
-                      <td className="py-3 px-4">
+                      <td className="py-2 px-2 md:py-3 md:px-4">{tx.description || "-"}</td>
+                      <td className="hidden sm:table-cell py-2 px-2 md:py-3 md:px-4">
                         <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-muted">
                           {tx.category}
                         </span>
                       </td>
-                      <td className={`py-3 px-4 text-right font-medium ${
+                      <td className={`py-2 px-2 md:py-3 md:px-4 text-right font-medium ${
                         tx.type === "income" ? "text-green-600" : "text-red-600"
                       }`}>
                         {tx.type === "income" ? "+" : "-"} {formatCurrency(parseFloat(tx.amount), tx.currency)}
                       </td>
-                      <td className="py-3 px-4 text-right">
+                      <td className="py-2 px-2 md:py-3 md:px-4 text-right">
                         <div className="flex justify-end gap-1">
-                          {/* Edit Button */}
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8"
+                            className="h-10 w-10 md:h-8 md:w-8"
                             onClick={() => setEditingTransaction(tx)}
                           >
                             <Pencil className="h-4 w-4" />
                             <span className="sr-only">Edit</span>
                           </Button>
 
-                          {/* Delete Button with Confirmation */}
                           <ConfirmDialog
                             trigger={
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8 text-destructive hover:text-destructive"
+                                className="h-10 w-10 md:h-8 md:w-8 text-destructive hover:text-destructive"
                                 disabled={deletingId === tx.id}
                               >
                                 {deletingId === tx.id ? (

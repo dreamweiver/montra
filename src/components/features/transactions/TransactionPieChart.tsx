@@ -142,14 +142,14 @@ export default function TransactionPieChart({
             index="name"
             valueFormatter={formatCurrency}
             showAnimation
-            className="h-52 w-52"
+            className="h-40 w-40 md:h-52 md:w-52"
             colors={chartColors}
             customTooltip={CustomTooltip}
           />
         </div>
 
         {/* Legend with values */}
-        <div className="w-full lg:w-1/2 space-y-2 max-h-52 overflow-y-auto">
+        <div className="w-full lg:w-1/2 space-y-2 max-h-40 md:max-h-52 overflow-y-auto">
           {categoryData.map((item, idx) => {
             const percentage = ((item.value / totalExpense) * 100).toFixed(1);
             return (
@@ -159,7 +159,7 @@ export default function TransactionPieChart({
                     className="w-3 h-3 rounded-full flex-shrink-0"
                     style={{ backgroundColor: HEX_COLORS[idx % HEX_COLORS.length] }}
                   />
-                  <span className="truncate max-w-[120px]">{item.name}</span>
+                  <span className="truncate max-w-[150px] md:max-w-[120px]">{item.name}</span>
                 </div>
                 <div className="flex items-center gap-2 text-right">
                   <span className="font-medium">{formatCurrency(item.value)}</span>

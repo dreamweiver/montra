@@ -86,7 +86,7 @@ export default function SpendingChart({
     return (
       <Card className="p-6">
         <h3 className="text-lg font-semibold mb-4">{title}</h3>
-        <div className="flex items-center justify-center h-64 text-muted-foreground">
+        <div className="flex items-center justify-center h-48 md:h-64 text-muted-foreground">
           No expense data available
         </div>
       </Card>
@@ -117,7 +117,7 @@ export default function SpendingChart({
             colors={colors}
             valueFormatter={formatCurrency}
             showAnimation
-            className="h-64"
+            className="h-48 md:h-64"
             customTooltip={CustomTooltip}
           />
         </div>

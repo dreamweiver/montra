@@ -191,13 +191,15 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 - [x] Recurring transactions (daily, weekly, monthly, yearly)
 - [x] Multi-currency support (11 currencies)
 - [x] Dark/Light theme toggle with system detection
+- [x] Settings page (profile, preferences, default currency)
+- [x] Export transactions to CSV with summary totals
+- [x] Budget goals & alerts with dashboard indicators
 
 ### 📋 Planned
 
-- [ ] Settings page (profile, preferences, default currency)
-- [ ] Export transactions to CSV
-- [ ] Budget goals & alerts
+- [ ] Mobile responsive UI
 - [ ] Investments tracking page
+- [ ] Deploy to Vercel
 
 ---
 

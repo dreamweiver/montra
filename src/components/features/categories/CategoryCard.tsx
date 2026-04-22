@@ -78,12 +78,12 @@ export default function CategoryCard({ category, onEdit, onDelete }: CategoryCar
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex items-center gap-1 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => onEdit(category)}
-              className="h-8 w-8"
+              className="h-10 w-10 md:h-8 md:w-8"
             >
               <Pencil className="h-4 w-4" />
             </Button>
@@ -91,7 +91,7 @@ export default function CategoryCard({ category, onEdit, onDelete }: CategoryCar
               variant="ghost"
               size="icon"
               onClick={() => setShowDelete(true)}
-              className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+              className="h-10 w-10 md:h-8 md:w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
             >
               <Trash2 className="h-4 w-4" />
             </Button>

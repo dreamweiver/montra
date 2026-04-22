@@ -39,7 +39,7 @@ export default function BudgetIndicator() {
       </div>
 
       {/* Progress bar */}
-      <div className="relative w-32 h-5 bg-muted rounded-full overflow-hidden shadow-inner">
+      <div className="relative w-24 sm:w-32 h-5 bg-muted rounded-full overflow-hidden shadow-inner">
         {/* Filled portion with gradient and shine */}
         <div
           className="h-full rounded-full relative transition-all duration-700 ease-out"

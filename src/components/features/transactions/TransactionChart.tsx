@@ -10,6 +10,7 @@ import { Card } from "@tremor/react";
 import { BarChart } from "@tremor/react";
 import { format, eachDayOfInterval, startOfDay, subDays } from "date-fns";
 import { formatCurrency } from "@/lib/utils";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import type { Transaction } from "@/types";
 
 // =============================================================================
@@ -46,6 +47,8 @@ export default function TransactionChart({
   transactions,
   title = "Income vs Expense",
 }: TransactionChartProps) {
+  const isDesktop = useMediaQuery("(min-width: 768px)");
+
   if (transactions.length === 0) {
     return (
       <Card className="p-6">
@@ -101,11 +104,11 @@ export default function TransactionChart({
 
   return (
     <Card className="p-6">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col gap-2 mb-4 md:flex-row md:items-center md:justify-between md:mb-6">
         <h3 className="text-lg font-semibold">{title}</h3>
-        
+
         {/* Custom Legend */}
-        <div className="flex items-center gap-6">
+        <div className="flex flex-col gap-1 md:flex-row md:items-center md:gap-6">
           <div className="flex items-center gap-2">
             <div className="w-4 h-4 rounded bg-green-500" />
             <span className="text-sm font-medium">Income</span>
@@ -129,9 +132,9 @@ export default function TransactionChart({
         categories={["Income", "Expense"]}
         colors={["green", "red"] as const}
         valueFormatter={formatChartValue}
-        yAxisWidth={65}
+        yAxisWidth={isDesktop ? 65 : 45}
         showAnimation
-        className="h-72"
+        className="h-48 md:h-64 lg:h-72"
         showLegend={false}
         minValue={0}
         allowDecimals={false}

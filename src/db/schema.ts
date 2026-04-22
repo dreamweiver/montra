@@ -104,3 +104,22 @@ export const budgets = pgTable("budgets", {
   created_at: timestamp("created_at").defaultNow().notNull(),          // Record creation time
   updated_at: timestamp("updated_at").defaultNow().notNull(),          // Last update time
 });
+
+// =============================================================================
+// Investments Table
+// =============================================================================
+export const investments = pgTable("investments", {
+  id: serial("id").primaryKey(),
+  user_id: uuid("user_id").notNull(),
+  name: text("name").notNull(),
+  symbol: text("symbol"),
+  type: text("type").notNull(),
+  quantity: numeric("quantity", { precision: 12, scale: 4 }).notNull(),
+  purchase_price: numeric("purchase_price", { precision: 12, scale: 2 }).notNull(),
+  current_price: numeric("current_price", { precision: 12, scale: 2 }).notNull(),
+  currency: text("currency").default("INR").notNull(),
+  purchase_date: timestamp("purchase_date").notNull(),
+  notes: text("notes"),
+  created_at: timestamp("created_at").defaultNow().notNull(),
+  updated_at: timestamp("updated_at").defaultNow().notNull(),
+});

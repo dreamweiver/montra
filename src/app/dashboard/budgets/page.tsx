@@ -106,7 +106,7 @@ export default function BudgetsPage() {
   }
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Budget</h2>
         <p className="text-muted-foreground">Set a monthly spending limit and track your progress</p>

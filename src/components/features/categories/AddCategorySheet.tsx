@@ -101,20 +101,20 @@ export default function AddCategorySheet({ type, onSuccess }: AddCategorySheetPr
         </Button>
       </SheetTrigger>
 
-      <SheetContent className="sm:max-w-md p-6 overflow-hidden">
+      <SheetContent className="w-full sm:max-w-md p-4 md:p-6 overflow-hidden">
         {loading && <LoadingOverlay message="Adding category" />}
 
-        <SheetHeader className="mb-6">
-          <SheetTitle className="text-xl">
+        <SheetHeader className="mb-4 md:mb-6">
+          <SheetTitle className="text-lg md:text-xl">
             Add {type === "income" ? "Income" : "Expense"} Category
           </SheetTitle>
-          <SheetDescription>
+          <SheetDescription className="text-xs md:text-sm">
             Create a new category to organize your transactions
           </SheetDescription>
         </SheetHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <fieldset disabled={loading} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
+          <fieldset disabled={loading} className="space-y-4 md:space-y-6">
             {/* Category Name */}
             <div className="space-y-2">
               <Label htmlFor="name" className="text-sm font-medium">
@@ -134,13 +134,13 @@ export default function AddCategorySheet({ type, onSuccess }: AddCategorySheetPr
             {/* Icon Picker */}
             <div className="space-y-2">
               <Label className="text-sm font-medium">Icon</Label>
-              <div className="grid grid-cols-10 gap-1">
+              <div className="grid grid-cols-8 md:grid-cols-10 gap-1">
                 {CATEGORY_EMOJIS.map((emoji) => (
                   <button
                     key={emoji}
                     type="button"
                     onClick={() => setValue("icon", emoji)}
-                    className={`text-xl p-2 rounded hover:bg-muted transition-colors ${
+                    className={`text-lg md:text-xl p-1.5 md:p-2 rounded hover:bg-muted transition-colors ${
                       selectedIcon === emoji ? "bg-muted ring-2 ring-primary" : ""
                     }`}
                   >
@@ -153,7 +153,7 @@ export default function AddCategorySheet({ type, onSuccess }: AddCategorySheetPr
             {/* Color Picker */}
             <div className="space-y-2">
               <Label className="text-sm font-medium">Color</Label>
-              <div className="grid grid-cols-10 gap-1">
+              <div className="grid grid-cols-8 md:grid-cols-10 gap-1">
                 {CATEGORY_COLORS.map((color) => (
                   <button
                     key={color}

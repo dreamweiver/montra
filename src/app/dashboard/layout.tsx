@@ -352,8 +352,9 @@ import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { LogOut, Home, CreditCard, TrendingUp, Settings, Menu, FolderOpen, CalendarClock, Target } from "lucide-react";
+import { LogOut, Home, CreditCard, TrendingUp, Settings, Menu, FolderOpen, CalendarClock, Target, X } from "lucide-react";
 import { ThemeToggle, BudgetIndicator } from "@/components/shared";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 export default function DashboardLayout({
   children,
@@ -363,6 +364,7 @@ export default function DashboardLayout({
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -389,84 +391,57 @@ export default function DashboardLayout({
     );
   }
 
+  const navItems = [
+    { icon: Home, label: "Dashboard", path: "/dashboard" },
+    { icon: CreditCard, label: "Transactions", path: "/dashboard/transactions" },
+    { icon: FolderOpen, label: "Categories", path: "/dashboard/categories" },
+    { icon: CalendarClock, label: "Recurring", path: "/dashboard/recurring" },
+    { icon: Target, label: "Budgets", path: "/dashboard/budgets" },
+    { icon: TrendingUp, label: "Investments", path: "" },
+    { icon: Settings, label: "Settings", path: "/dashboard/settings" },
+  ];
+
+  const handleNavClick = (path: string, closeMobile?: boolean) => {
+    if (path) router.push(path);
+    if (closeMobile) setMobileMenuOpen(false);
+  };
+
+  const handleMenuToggle = () => {
+    if (typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches) {
+      setSidebarOpen(!sidebarOpen);
+    } else {
+      setMobileMenuOpen(true);
+    }
+  };
+
   return (
     <div className="flex h-screen bg-background">
-      {/* Sidebar */}
-      <div className={`border-r bg-card transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-20'}`}>
+      {/* Desktop Sidebar */}
+      <div className={`hidden md:block border-r bg-card transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-20'}`}>
         <div className="flex h-full flex-col">
-          {/* Logo */}
           <div className="p-6 border-b">
             <h2 className="text-2xl font-bold tracking-tight">
               {sidebarOpen ? "Finance" : "F"}
             </h2>
           </div>
 
-          {/* Navigation */}
           <nav className="flex-1 p-4 space-y-2">
-           <Button 
-            variant="ghost" 
-            className="w-full justify-start cursor-pointer"
-            onClick={() => router.push("/dashboard")}
-          >
-            <Home className="mr-3 h-5 w-5" />
-            {sidebarOpen && "Dashboard"}
-          </Button>
-
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start cursor-pointer"
-              onClick={() => router.push("/dashboard/transactions")}
-            >
-              <CreditCard className="mr-3 h-5 w-5" />
-              {sidebarOpen && "Transactions"}
-            </Button>
-
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start cursor-pointer"
-              onClick={() => router.push("/dashboard/categories")}
-            >
-              <FolderOpen className="mr-3 h-5 w-5" />
-              {sidebarOpen && "Categories"}
-            </Button>
-
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start cursor-pointer"
-              onClick={() => router.push("/dashboard/recurring")}
-            >
-              <CalendarClock className="mr-3 h-5 w-5" />
-              {sidebarOpen && "Recurring"}
-            </Button>
-
-            <Button
-              variant="ghost"
-              className="w-full justify-start cursor-pointer"
-              onClick={() => router.push("/dashboard/budgets")}
-            >
-              <Target className="mr-3 h-5 w-5" />
-              {sidebarOpen && "Budgets"}
-            </Button>
-
-            <Button variant="ghost" className="w-full justify-start cursor-pointer">
-              <TrendingUp className="mr-3 h-5 w-5" />
-              {sidebarOpen && "Investments"}
-            </Button>
-
-            <Button
-              variant="ghost"
-              className="w-full justify-start cursor-pointer"
-              onClick={() => router.push("/dashboard/settings")}
-            >
-              <Settings className="mr-3 h-5 w-5" />
-              {sidebarOpen && "Settings"}
-            </Button>
+            {navItems.map((item) => (
+              <Button
+                key={item.label}
+                variant="ghost"
+                className="w-full justify-start cursor-pointer"
+                onClick={() => handleNavClick(item.path)}
+              >
+                <item.icon className="mr-3 h-5 w-5" />
+                {sidebarOpen && item.label}
+              </Button>
+            ))}
           </nav>
 
-          {/* Logout at bottom */}
           <div className="p-4 border-t">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               className="w-full justify-start text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
               onClick={handleLogout}
             >
@@ -477,32 +452,74 @@ export default function DashboardLayout({
         </div>
       </div>
 
+      {/* Mobile Sidebar Drawer */}
+      <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+        <SheetContent side="left" showCloseButton={false} className="w-64 p-0">
+          <SheetTitle className="sr-only">Navigation</SheetTitle>
+          <div className="flex h-full flex-col">
+            <div className="p-6 border-b flex items-center justify-between">
+              <h2 className="text-2xl font-bold tracking-tight">Finance</h2>
+              <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)}>
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+
+            <nav className="flex-1 p-4 space-y-2">
+              {navItems.map((item) => (
+                <Button
+                  key={item.label}
+                  variant="ghost"
+                  className="w-full justify-start cursor-pointer"
+                  onClick={() => handleNavClick(item.path, true)}
+                >
+                  <item.icon className="mr-3 h-5 w-5" />
+                  {item.label}
+                </Button>
+              ))}
+            </nav>
+
+            <div className="p-4 border-t">
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+                onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
+              >
+                <LogOut className="mr-3 h-5 w-5" />
+                Logout
+              </Button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Top Navbar */}
-        <header className="border-b bg-card px-6 py-4 flex items-center justify-between">
+        <header className="border-b bg-card px-4 md:px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="icon"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
+              onClick={handleMenuToggle}
             >
               <Menu className="h-5 w-5" />
             </Button>
-            <h1 className="text-xl font-semibold">Dashboard</h1>
+            <h1 className="text-lg md:text-xl font-semibold">Dashboard</h1>
           </div>
 
-          <div className="flex items-center gap-4">
-            <BudgetIndicator />
+          <div className="flex items-center gap-2 md:gap-4">
+            <div className="hidden sm:block">
+              <BudgetIndicator />
+            </div>
             <ThemeToggle />
-            <div className="text-sm text-muted-foreground">
+            <div className="hidden md:block text-sm text-muted-foreground">
               Welcome back
             </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto p-8">
+        <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
           {children}
         </main>
       </div>

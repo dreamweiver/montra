@@ -181,7 +181,7 @@ export default function AddTransactionSheet({ onSuccess }: AddTransactionSheetPr
         </Button>
       </SheetTrigger>
 
-      <SheetContent className="sm:max-w-lg p-6 overflow-y-auto">
+      <SheetContent className="w-full sm:max-w-lg p-4 md:p-6 overflow-y-auto">
         {/* Loading Overlay */}
         {loading && <LoadingOverlay message="Adding transaction" />}
 

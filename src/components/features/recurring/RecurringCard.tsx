@@ -58,7 +58,7 @@ export default function RecurringCard({
 
   return (
     <Card className={`p-5 transition-opacity ${!recurring.is_active ? "opacity-50" : ""}`}>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {/* Left: Icon + Details */}
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <div
@@ -96,7 +96,7 @@ export default function RecurringCard({
         </div>
 
         {/* Center: Dates & Amount */}
-        <div className="text-right mr-4">
+        <div className="text-left sm:text-right sm:mr-4">
           <p className={`font-semibold ${isExpense ? "text-rose-600" : "text-emerald-600"}`}>
             {isExpense ? "-" : "+"}{formatCurrency(recurring.amount, recurring.currency)}
           </p>
@@ -111,11 +111,11 @@ export default function RecurringCard({
         </div>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 self-end sm:self-auto">
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="h-10 w-10 md:h-8 md:w-8"
             onClick={() => onToggle(recurring.id, !recurring.is_active)}
             title={recurring.is_active ? "Pause" : "Resume"}
           >
@@ -128,7 +128,7 @@ export default function RecurringCard({
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8"
+            className="h-10 w-10 md:h-8 md:w-8"
             onClick={() => onEdit(recurring)}
           >
             <Pencil className="h-4 w-4" />
@@ -136,7 +136,7 @@ export default function RecurringCard({
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-red-600 hover:text-red-700"
+            className="h-10 w-10 md:h-8 md:w-8 text-red-600 hover:text-red-700"
             onClick={() => onDelete(recurring.id)}
           >
             <Trash2 className="h-4 w-4" />

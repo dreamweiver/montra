@@ -152,7 +152,7 @@ export default function EditTransactionSheet({
   // =============================================================================
   return (
     <Sheet open={open} onOpenChange={(isOpen) => !loading && onOpenChange(isOpen)}>
-      <SheetContent className="sm:max-w-lg p-6 overflow-y-auto">
+      <SheetContent className="w-full sm:max-w-lg p-4 md:p-6 overflow-y-auto">
         {/* Loading Overlay */}
         {loading && <LoadingOverlay message="Updating transaction" />}
 

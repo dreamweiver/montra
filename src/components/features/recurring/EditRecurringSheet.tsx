@@ -130,7 +130,7 @@ export default function EditRecurringSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="overflow-y-auto p-6">
+      <SheetContent className="w-full sm:max-w-lg overflow-y-auto p-4 md:p-6">
         {loading && <LoadingOverlay />}
 
         <SheetHeader>

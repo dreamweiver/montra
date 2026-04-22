@@ -287,6 +287,35 @@ export const LIVE_FETCH_TYPES = ["stock", "mutual_fund", "crypto"] as const;
 | `src/actions/investments.ts` | Contains `getInvestmentStats()` — no changes to `stats.ts` |
 | `package.json` | Add `yahoo-finance2` dependency |
 
+## Testing
+
+Unit tests required for all new code, following existing Vitest + React Testing Library patterns in the project.
+
+### Server Action Tests (`src/actions/investments.test.ts`)
+- `getInvestments()` — returns investments for authenticated user, returns empty for unauthenticated
+- `addInvestment()` — creates investment, validates required fields, rejects unauthenticated
+- `updateInvestment()` — updates existing, rejects non-owner, rejects unauthenticated
+- `deleteInvestment()` — deletes existing, rejects non-owner, returns error for non-existent
+- `getInvestmentStats()` — returns correct aggregates, returns zeros when no investments
+- `updateInvestmentPrices()` — bulk updates prices, rejects unauthenticated
+
+### Validation Tests (`src/lib/validations/investment.test.ts`)
+- Valid investment data passes
+- Missing required fields fail (name, type, quantity, purchase_price, current_price, currency, purchase_date)
+- Invalid amounts fail (0, negative, non-numeric)
+- Invalid type value fails
+- Optional fields (symbol, notes) can be omitted
+
+### Component Tests
+- `InvestmentStatsCards.test.tsx` — renders all 4 stat cards with correct values, green/red coloring for gains/losses
+- `AddInvestmentSheet.test.tsx` — renders form fields, shows/hides symbol field based on type, validates on submit
+- `EditInvestmentSheet.test.tsx` — pre-populates form with existing data, submits updates
+
+### API Route Tests (`src/app/api/investments/prices/route.test.ts`)
+- Returns prices for valid symbols
+- Handles invalid/missing symbols gracefully
+- Returns empty object when no symbols provided
+
 ## Out of Scope (V2)
 
 - Buy/sell transaction history per holding

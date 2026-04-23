@@ -8,17 +8,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Loader2, Target, TrendingUp } from "lucide-react";
-import {
-  getDashboardStats,
-  getSpendingByCategory,
-  getMonthlyTrend,
-  getRecentTransactions,
-  type DashboardStats,
-  type CategorySpending,
-  type MonthlyTrend,
-} from "@/actions/stats";
-import { checkBudgetStatus } from "@/actions/budgets";
-import { getInvestmentStats } from "@/actions/investments";
+import { getDashboardData, type DashboardData } from "@/actions/dashboard";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
 import {
@@ -27,28 +17,6 @@ import {
   MonthlyTrendChart,
   RecentTransactions,
 } from "@/components/features/dashboard";
-import type { BudgetStatus, InvestmentStats } from "@/types";
-
-// =============================================================================
-// Types
-// =============================================================================
-interface DashboardData {
-  stats: DashboardStats;
-  spending: CategorySpending[];
-  trend: MonthlyTrend[];
-  budgetStatus: BudgetStatus | null;
-  recentTransactions: Array<{
-    id: number;
-    amount: string;
-    type: "income" | "expense";
-    description: string | null;
-    category: string | null;
-    transaction_date: string;
-    category_icon?: string | null;
-    category_color?: string | null;
-  }>;
-  investmentStats: InvestmentStats | null;
-}
 
 // =============================================================================
 // Main Component
@@ -57,27 +25,10 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<DashboardData | null>(null);
 
-  // Fetch all dashboard data
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [stats, spending, trend, recentTransactions, budgetResult, investmentStats] = await Promise.all([
-        getDashboardStats(),
-        getSpendingByCategory(),
-        getMonthlyTrend(),
-        getRecentTransactions(5),
-        checkBudgetStatus(),
-        getInvestmentStats(),
-      ]);
-
-      setData({
-        stats,
-        spending,
-        trend,
-        budgetStatus: budgetResult.success && budgetResult.data?.hasBudget ? budgetResult.data : null,
-        recentTransactions: recentTransactions as DashboardData["recentTransactions"],
-        investmentStats: investmentStats.holdingCount > 0 ? investmentStats : null,
-      });
+      setData(await getDashboardData());
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
     } finally {

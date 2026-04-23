@@ -19,9 +19,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  getInvestments,
+  getInvestmentPageData,
   deleteInvestment,
-  getInvestmentStats,
   updateInvestmentPrices,
 } from "@/actions/investments";
 import {
@@ -88,14 +87,8 @@ export default function InvestmentsPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [investmentsResult, statsResult] = await Promise.all([
-        getInvestments(),
-        getInvestmentStats(),
-      ]);
-
-      if (investmentsResult.success && investmentsResult.data) {
-        setInvestments(investmentsResult.data.map(computeGains));
-      }
+      const { investments: data, stats: statsResult } = await getInvestmentPageData();
+      setInvestments(data.map(computeGains));
       setStats(statsResult);
     } catch (error) {
       console.error("Failed to fetch investments:", error);

@@ -1,12 +1,12 @@
 <div align="center">
 
-# 💰 MonTra
+# MonTra
 
 ### Money + Tracker = MonTra
 
-**Take Control of Your Money**
+**Track smart. Spend wise. Grow wealth.**
 
-A modern, sleek personal finance app built with Next.js 16, designed to help you track income, expenses, and visualize your financial journey.
+A modern personal finance app built with Next.js 16 to help you track income, expenses, budgets, and investments.
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
@@ -17,127 +17,90 @@ A modern, sleek personal finance app built with Next.js 16, designed to help you
 
 ---
 
-## ✨ Features
+## Features
 
-- 🔐 **Secure Authentication** — Powered by Supabase Auth
-- 💸 **Track Transactions** — Log income and expenses with categories
-- 📊 **Dashboard Analytics** — Real-time stats, summary cards, and charts
-- 🔍 **Filter & Search** — Multi-criteria filtering with date range presets
-- 🔄 **Recurring Transactions** — Auto-generated daily, weekly, monthly, or yearly entries
-- 💱 **Multi-Currency Support** — 11 currencies (INR, USD, EUR, GBP, JPY, and more)
-- 🏷️ **Category Management** — Custom income & expense categories with icons and colors
-- 🌗 **Dark/Light Theme** — System-aware toggle with persistent preference
-- 📱 **Responsive Design** — Works beautifully on all devices
-- ⚡ **Blazing Fast** — Built on Next.js App Router with React Server Components
-- 🎨 **Modern UI** — Clean interface with shadcn/ui components
+- **Authentication** — Supabase Auth with email/password
+- **Transactions** — Log income and expenses with categories, filter by date/type/category, export to CSV
+- **Categories** — Custom income & expense categories with icons, colors, and default seed
+- **Recurring Transactions** — Auto-generated daily, weekly, monthly, or yearly entries with pause/resume
+- **Budgets** — Monthly spending limits with progress tracking and dashboard alerts
+- **Investments** — Track stocks, mutual funds, crypto, gold, bonds, FDs, and real estate with live Yahoo Finance price refresh and symbol search typeahead
+- **Dashboard** — Financial overview with stats cards, monthly trend bar chart, spending donut chart, recent transactions, budget progress, and investment summary
+- **Multi-Currency** — 11 currencies (INR, USD, EUR, GBP, JPY, and more)
+- **Dark/Light Theme** — System-aware toggle with persistent preference
+- **Responsive** — Mobile-first layout with sidebar navigation and mobile drawer
+- **277 tests** — Vitest + React Testing Library across 24 test files
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 | Category | Technology |
 |----------|------------|
 | **Framework** | Next.js 16 (App Router) |
-| **Language** | TypeScript (Strict Mode) |
+| **Language** | TypeScript |
 | **Styling** | Tailwind CSS v4 |
 | **UI Components** | shadcn/ui + Radix UI |
+| **Charts** | Tremor (Recharts) |
 | **Database** | Neon PostgreSQL (Serverless) |
-| **ORM** | Drizzle ORM |
+| **ORM/Migrations** | Drizzle ORM + drizzle-kit |
 | **Authentication** | Supabase Auth |
 | **Forms** | React Hook Form + Zod |
-| **State** | Zustand |
-| **Charts** | Recharts |
+| **Market Data** | yahoo-finance2 |
+| **Testing** | Vitest + React Testing Library |
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 src/
-├── app/                    # Next.js App Router
-│   ├── (auth)/            # Auth pages (login, register)
-│   └── dashboard/         # Protected dashboard routes
-├── actions/               # Server Actions
+├── app/
+│   ├── (auth)/                # Login, register pages
+│   ├── api/investments/       # Yahoo Finance price + search API routes
+│   └── dashboard/
+│       ├── page.tsx           # Dashboard overview
+│       ├── transactions/      # Transaction list + CRUD
+│       ├── categories/        # Category management
+│       ├── recurring/         # Recurring transactions
+│       ├── budgets/           # Budget settings + progress
+│       ├── investments/       # Investment portfolio
+│       └── settings/          # User preferences
+├── actions/                   # Server Actions (consolidated per-page data fetches)
 ├── components/
-│   ├── features/          # Feature-specific components
-│   ├── shared/            # Reusable components
-│   └── ui/                # shadcn/ui components
-├── db/                    # Database schema & client
-├── hooks/                 # Custom React hooks
-├── lib/                   # Utilities & constants
-└── types/                 # TypeScript definitions
+│   ├── features/              # Feature-specific components
+│   ├── shared/                # Reusable (SymbolSearch, CurrencySelector, etc.)
+│   └── ui/                    # shadcn/ui primitives
+├── db/                        # Neon client + Drizzle schema
+├── hooks/                     # Custom hooks (useSymbolSearch, useMediaQuery, etc.)
+├── lib/                       # Utils, constants, validations
+└── types/                     # TypeScript definitions
 ```
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
 - Node.js 18+
-- npm/yarn/pnpm
-- [Neon Database](https://neon.tech) account (free tier available)
-- [Supabase](https://supabase.com) account (free tier available)
+- [Neon Database](https://neon.tech) account (free tier)
+- [Supabase](https://supabase.com) account (free tier)
 
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/montra.git
-   cd montra
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env.local
-   ```
-
----
-
-## 🔐 Environment Variables Setup
-
-This app requires three environment variables. Here's how to get each one:
-
-### 1. DATABASE_URL (Neon PostgreSQL)
-
-1. Go to [neon.tech](https://neon.tech) and create a free account
-2. Create a new project
-3. In your project dashboard, click **"Connection Details"**
-4. Copy the connection string (starts with `postgresql://...`)
-
-```env
-DATABASE_URL=postgresql://username:password@ep-xxx.region.aws.neon.tech/neondb?sslmode=require
+```bash
+git clone https://github.com/yourusername/montra.git
+cd montra
+npm install
 ```
 
-### 2. NEXT_PUBLIC_SUPABASE_URL
+### Environment Variables
 
-1. Go to [supabase.com](https://supabase.com) and create a free account
-2. Create a new project
-3. Go to **Settings → API**
-4. Copy the **Project URL**
+Create `.env.local` with:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
-```
-
-### 3. NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-1. In the same Supabase **Settings → API** page
-2. Copy the **anon public** key (under "Project API keys")
-
-```env
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-
-### Your final `.env.local` should look like:
-
-```env
-# Database (Neon)
+# Neon PostgreSQL
 DATABASE_URL=postgresql://username:password@ep-xxx.region.aws.neon.tech/neondb?sslmode=require
 
 # Supabase Auth
@@ -145,98 +108,66 @@ NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-> ⚠️ **Important:** Never commit `.env.local` to version control. It's already in `.gitignore`.
+| Variable | Where to find it |
+|----------|-----------------|
+| `DATABASE_URL` | Neon dashboard > Connection Details |
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase > Settings > API > Project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase > Settings > API > anon public key |
 
----
-
-### Continue Setup
-
-4. **Run database migrations**
-   ```bash
-   npx drizzle-kit push
-   ```
-
-5. **Start the development server**
-   ```bash
-   npm run dev
-   ```
-
-6. **Open your browser**
-   
-   Navigate to [http://localhost:3000](http://localhost:3000)
-
----
-
-## 📸 Screenshots
-
-<div align="center">
-
-| Dashboard | Transactions |
-|-----------|--------------|
-| *Coming soon* | *Coming soon* |
-
-</div>
-
----
-
-## 🗺️ Roadmap
-
-### ✅ Completed
-- [x] User authentication (Supabase)
-- [x] Add, edit, and delete transactions with categories
-- [x] Dashboard with real-time stats & summary cards
-- [x] Charts & analytics (Recharts + Tremor)
-- [x] Filter & search transactions (date range, type, category)
-- [x] Custom category management (income & expense)
-- [x] Recurring transactions (daily, weekly, monthly, yearly)
-- [x] Multi-currency support (11 currencies)
-- [x] Dark/Light theme toggle with system detection
-- [x] Settings page (profile, preferences, default currency)
-- [x] Export transactions to CSV with summary totals
-- [x] Budget goals & alerts with dashboard indicators
-
-### 📋 Planned
-
-- [ ] Mobile responsive UI
-- [ ] Investments tracking page
-- [ ] Deploy to Vercel
-
----
-
-## � Testing
-
-Tests are written with [Vitest](https://vitest.dev/) + [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/) and co-located next to source files.
+### Run
 
 ```bash
-# Run tests in watch mode
-npm test
-
-# Single test run
-npm run test:run
-
-# Run with coverage report
-npm run test:coverage
+npx drizzle-kit push    # Apply database schema
+npm run dev             # Start dev server at http://localhost:3000
 ```
 
-Coverage reports are generated in both **terminal** and **HTML** format (at `coverage/index.html`).
+---
+
+## Testing
+
+```bash
+npm test                # Watch mode
+npm run test:run        # Single run
+npm run test:coverage   # With coverage report
+```
+
+24 test files, 277 tests covering server actions, API routes, hooks, validations, and components.
 
 ---
 
-## �🤝 Contributing
+## Roadmap
 
-Contributions are welcome! Feel free to open an issue or submit a pull request.
+### Done
+- [x] Authentication (Supabase email/password)
+- [x] Transactions CRUD with filters, search, and CSV export
+- [x] Custom category management with icons and colors
+- [x] Recurring transactions (daily/weekly/monthly/yearly) with auto-processing
+- [x] Monthly budget goals with progress bars and alerts
+- [x] Investment tracking with 7 asset types
+- [x] Live price refresh via Yahoo Finance API
+- [x] Symbol search typeahead for stocks/crypto/mutual funds
+- [x] Dashboard with consolidated single-call data fetch
+- [x] Multi-currency support (11 currencies)
+- [x] Dark/light theme with system detection
+- [x] Responsive mobile layout with sidebar drawer
+- [x] Consolidated server actions (single auth + parallel SQL per page)
+
+### Next
+- [ ] Deploy to Vercel
+- [ ] Portfolio allocation chart
+- [ ] Buy/sell transaction history per holding
+- [ ] Goal-based investment tracking
+- [ ] Import from CSV/broker statements
 
 ---
 
-## 📄 License
+## License
 
-This project is open source and available under the [MIT License](LICENSE).
+MIT
 
 ---
 
 <div align="center">
-
-**Made with ❤️ and ☕**
 
 *Track smart. Spend wise. Grow wealth.*
 

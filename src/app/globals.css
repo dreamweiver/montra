@@ -189,9 +189,9 @@
   --tremor-ring-DEFAULT: rgba(59, 130, 246, 0.5);
 }
 
-/* Tremor bar/chart fill colors */
-[data-testid="bar-chart"] [fill],
-.recharts-bar-rectangle [fill] {
+/* Tremor bar/chart fill colors - only target bar rectangles, not axis text */
+[data-testid="bar-chart"] rect[fill],
+.recharts-bar-rectangle rect[fill] {
   fill: currentColor;
 }
 
@@ -279,6 +279,51 @@
 
 /* Tremor applies fill via currentColor - ensure SVG inherits colors */
 svg path[fill="currentColor"] { fill: currentColor; }
+
+/* Ensure Recharts axis tick labels are visible */
+.recharts-cartesian-axis-tick-value,
+.recharts-text {
+  fill: #111827 !important;
+}
+
+/* Tremor legend text visibility */
+[data-testid="bar-chart"] text,
+.recharts-legend-item-text,
+.recharts-label {
+  fill: #111827 !important;
+}
+
+.dark .recharts-cartesian-axis-tick-value,
+.dark .recharts-text,
+.dark [data-testid="bar-chart"] text,
+.dark .recharts-legend-item-text,
+.dark .recharts-label {
+  fill: #e5e7eb !important;
+}
+
+/* Tremor text utilities for Tailwind v4 compatibility */
+.text-tremor-default { font-size: 0.875rem; line-height: 1.25rem; }
+.text-tremor-label { font-size: 0.75rem; line-height: 1rem; }
+.text-tremor-content { color: #111827; }
+.text-tremor-content-emphasis { color: #111827; }
+.text-tremor-content-strong { color: #030712; }
+.text-tremor-content-subtle { color: #6b7280; }
+.fill-tremor-content { fill: #111827 !important; }
+.fill-tremor-content-emphasis { fill: #111827 !important; }
+.dark .text-dark-tremor-content,
+.dark .text-tremor-content { color: #e5e7eb !important; }
+.dark .text-dark-tremor-content-emphasis,
+.dark .text-tremor-content-emphasis { color: #f9fafb !important; }
+.dark .fill-dark-tremor-content,
+.dark .fill-tremor-content { fill: #e5e7eb !important; }
+.dark .fill-dark-tremor-content-emphasis,
+.dark .fill-tremor-content-emphasis { fill: #f9fafb !important; }
+.bg-tremor-background { background-color: transparent; }
+.bg-tremor-background-subtle { background-color: transparent; }
+.dark .bg-dark-tremor-background,
+.dark .bg-tremor-background { background-color: transparent; }
+.dark .bg-dark-tremor-background-subtle,
+.dark .bg-tremor-background-subtle { background-color: transparent; }
 
 /* Pie chart color overrides */
 

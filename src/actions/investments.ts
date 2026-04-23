@@ -13,6 +13,11 @@ import { getAuthUser } from "@/actions/auth";
 import { extractErrorMessage } from "@/lib/utils";
 import type { Investment, InvestmentStats } from "@/types";
 
+export interface InvestmentPageData {
+  investments: Investment[];
+  stats: InvestmentStats;
+}
+
 // =============================================================================
 // Get Investments
 // =============================================================================
@@ -247,4 +252,44 @@ export async function updateInvestmentPrices(
     console.error("Update investment prices error:", error);
     return { success: false, error: message };
   }
+}
+
+// =============================================================================
+// Get Investment Page Data (consolidated)
+// =============================================================================
+export async function getInvestmentPageData(): Promise<InvestmentPageData> {
+  const user = await getAuthUser();
+  if (!user) return { investments: [], stats: ZERO_STATS };
+
+  const [investmentRows, statsRows] = await Promise.all([
+    sql`
+      SELECT * FROM investments
+      WHERE user_id = ${user.id}
+      ORDER BY created_at DESC
+    `,
+    sql`
+      SELECT
+        COUNT(*) as holding_count,
+        SUM(quantity * purchase_price) as total_invested,
+        SUM(quantity * current_price) as total_current
+      FROM investments
+      WHERE user_id = ${user.id}
+    `,
+  ]);
+
+  const investments = investmentRows as Investment[];
+
+  const row = statsRows[0];
+  const totalInvested = parseFloat(row?.total_invested || "0");
+  const currentValue = parseFloat(row?.total_current || "0");
+  const holdingCount = parseInt(row?.holding_count || "0", 10);
+
+  let stats = ZERO_STATS;
+  if (holdingCount > 0) {
+    const totalGainLoss = currentValue - totalInvested;
+    const gainPercentage = totalInvested > 0 ? Math.round((totalGainLoss / totalInvested) * 100) : 0;
+    stats = { totalInvested, currentValue, totalGainLoss, gainPercentage, holdingCount };
+  }
+
+  return { investments, stats };
 }

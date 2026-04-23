@@ -10,10 +10,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { toast } from "sonner";
 import {
+  getRecurringPageData,
   getRecurringTransactions,
   deleteRecurringTransaction,
   toggleRecurringTransaction,
-  processDueRecurringTransactions,
 } from "@/actions/recurring";
 import { AddRecurringSheet, EditRecurringSheet, RecurringCard } from "@/components/features/recurring";
 import { ConfirmDialog, EmptyState } from "@/components/shared";
@@ -44,11 +44,12 @@ export default function RecurringPage() {
   // Process due transactions and fetch on mount
   useEffect(() => {
     const init = async () => {
-      const result = await processDueRecurringTransactions();
-      if (result.processed > 0) {
-        toast.info(`${result.processed} recurring transaction(s) generated`);
+      const { items, processed } = await getRecurringPageData();
+      if (processed > 0) {
+        toast.info(`${processed} recurring transaction(s) generated`);
       }
-      await fetchData();
+      setRecurringList(items);
+      setLoading(false);
     };
     init();
   }, [fetchData]);

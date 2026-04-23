@@ -7,7 +7,7 @@
 // =============================================================================
 
 import { useState, useEffect, useCallback } from "react";
-import { Loader2, Target } from "lucide-react";
+import { Loader2, Target, TrendingUp } from "lucide-react";
 import {
   getDashboardStats,
   getSpendingByCategory,
@@ -18,6 +18,8 @@ import {
   type MonthlyTrend,
 } from "@/actions/stats";
 import { checkBudgetStatus } from "@/actions/budgets";
+import { getInvestmentStats } from "@/actions/investments";
+import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
 import {
   StatsCards,
@@ -25,7 +27,7 @@ import {
   MonthlyTrendChart,
   RecentTransactions,
 } from "@/components/features/dashboard";
-import type { BudgetStatus } from "@/types";
+import type { BudgetStatus, InvestmentStats } from "@/types";
 
 // =============================================================================
 // Types
@@ -45,6 +47,7 @@ interface DashboardData {
     category_icon?: string | null;
     category_color?: string | null;
   }>;
+  investmentStats: InvestmentStats | null;
 }
 
 // =============================================================================
@@ -58,12 +61,13 @@ export default function DashboardPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [stats, spending, trend, recentTransactions, budgetResult] = await Promise.all([
+      const [stats, spending, trend, recentTransactions, budgetResult, investmentStats] = await Promise.all([
         getDashboardStats(),
         getSpendingByCategory(),
         getMonthlyTrend(),
         getRecentTransactions(5),
         checkBudgetStatus(),
+        getInvestmentStats(),
       ]);
 
       setData({
@@ -72,6 +76,7 @@ export default function DashboardPage() {
         trend,
         budgetStatus: budgetResult.success && budgetResult.data?.hasBudget ? budgetResult.data : null,
         recentTransactions: recentTransactions as DashboardData["recentTransactions"],
+        investmentStats: investmentStats.holdingCount > 0 ? investmentStats : null,
       });
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
@@ -149,6 +154,30 @@ export default function DashboardPage() {
             {formatCurrency(data.budgetStatus.spent, data.budgetStatus.currency)} of {formatCurrency(data.budgetStatus.limit, data.budgetStatus.currency)} spent
           </p>
         </div>
+      )}
+
+      {/* Investment Summary */}
+      {data?.investmentStats && (
+        <Link href="/dashboard/investments" className="block">
+          <div className="rounded-lg border bg-card p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Investments</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium">
+                  {formatCurrency(data.investmentStats.currentValue)}
+                </span>
+                <span className={`text-sm font-medium ${
+                  data.investmentStats.gainPercentage >= 0 ? "text-green-600" : "text-red-600"
+                }`}>
+                  {data.investmentStats.gainPercentage >= 0 ? "+" : ""}{data.investmentStats.gainPercentage}%
+                </span>
+              </div>
+            </div>
+          </div>
+        </Link>
       )}
 
       {/* Charts Row */}

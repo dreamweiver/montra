@@ -5,7 +5,9 @@ const { mockQuote } = vi.hoisted(() => ({
 }));
 
 vi.mock("yahoo-finance2", () => ({
-  default: { quote: mockQuote },
+  default: class {
+    quote = mockQuote;
+  },
 }));
 
 import { GET } from "@/app/api/investments/prices/route";

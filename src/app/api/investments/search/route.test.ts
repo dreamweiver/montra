@@ -3,7 +3,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const mockSearch = vi.hoisted(() => vi.fn());
 
 vi.mock("yahoo-finance2", () => ({
-  default: { search: mockSearch },
+  default: class {
+    search = mockSearch;
+  },
 }));
 
 import { GET } from "./route";

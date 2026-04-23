@@ -118,7 +118,12 @@ export default function InvestmentsPage() {
     );
 
     if (liveFetchable.length === 0) {
-      toast.info("No holdings eligible for live price fetch");
+      const hasLiveType = investments.some((inv) => LIVE_FETCH_TYPES.includes(inv.type));
+      if (hasLiveType) {
+        toast.info("Add a ticker symbol to your holdings to enable live price fetch (edit the holding and add the symbol)");
+      } else {
+        toast.info("No holdings eligible for live price fetch (only stocks, mutual funds, and crypto are supported)");
+      }
       return;
     }
 
@@ -126,15 +131,16 @@ export default function InvestmentsPage() {
     try {
       const symbols = liveFetchable.map((inv) => inv.symbol).join(",");
       const response = await fetch(`/api/investments/prices?symbols=${symbols}`);
-      const priceData = await response.json();
+      const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(priceData.error || "Failed to fetch prices");
+        throw new Error(data.error || "Failed to fetch prices");
       }
 
+      const prices = data.prices ?? data;
       const updates = liveFetchable
-        .filter((inv) => priceData[inv.symbol!] !== undefined)
-        .map((inv) => ({ id: inv.id, currentPrice: priceData[inv.symbol!] }));
+        .filter((inv) => prices[inv.symbol!] !== undefined)
+        .map((inv) => ({ id: inv.id, currentPrice: prices[inv.symbol!] }));
 
       if (updates.length > 0) {
         await updateInvestmentPrices(updates);

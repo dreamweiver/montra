@@ -221,14 +221,22 @@ export default function AddInvestmentSheet({ onSuccess }: AddInvestmentSheetProp
           {/* ----- Symbol (conditional: only for stock, mutual_fund, crypto) ----- */}
           {LIVE_FETCH_TYPES.includes(type) && (
             <div className="space-y-2">
-              <Label htmlFor="symbol" className="text-base font-medium">Symbol</Label>
+              <Label htmlFor="symbol" className="text-base font-medium">
+                Ticker Symbol <span className="text-red-500">*</span>
+              </Label>
               <Input
                 id="symbol"
                 type="text"
-                placeholder="e.g. AAPL, BTC"
+                placeholder="e.g. GOOGL, AAPL, BTC-USD"
                 {...register("symbol")}
-                className="h-12 text-base"
+                className={`h-12 text-base ${errors.symbol ? "border-red-500 focus-visible:ring-red-500" : ""}`}
               />
+              <p className="text-xs text-muted-foreground">
+                Required for live price refresh. Use Yahoo Finance ticker format.
+              </p>
+              {errors.symbol && (
+                <p className="text-sm text-red-500">{errors.symbol.message}</p>
+              )}
             </div>
           )}
 

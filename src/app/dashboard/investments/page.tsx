@@ -21,8 +21,8 @@ import {
 import {
   getInvestmentPageData,
   deleteInvestment,
-  updateInvestmentPrices,
 } from "@/actions/investments";
+import { refreshInvestmentPrices } from "@/actions/refreshPrices";
 import {
   InvestmentStatsCards,
   AddInvestmentSheet,
@@ -122,26 +122,12 @@ export default function InvestmentsPage() {
 
     setRefreshingPrices(true);
     try {
-      const symbols = liveFetchable.map((inv) => inv.symbol).join(",");
-      const response = await fetch(`/api/investments/prices?symbols=${symbols}`);
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to fetch prices");
-      }
-
-      const prices = data.prices ?? data;
-      const updates = liveFetchable
-        .filter((inv) => prices[inv.symbol!] !== undefined)
-        .map((inv) => ({ id: inv.id, currentPrice: prices[inv.symbol!] }));
-
-      if (updates.length > 0) {
-        await updateInvestmentPrices(updates);
-        toast.success(`Updated prices for ${updates.length} holding(s)`);
+      const { updated } = await refreshInvestmentPrices();
+      if (updated > 0) {
+        toast.success(`Updated prices for ${updated} holding(s)`);
       } else {
         toast.info("No price updates available");
       }
-
       await fetchData();
     } catch (error) {
       console.error("Failed to refresh prices:", error);

@@ -11,6 +11,7 @@ import { sql } from "@/db/neon";
 import { revalidatePath } from "next/cache";
 import { getAuthUser } from "@/actions/auth";
 import { extractErrorMessage } from "@/lib/utils";
+import { refreshInvestmentPrices } from "@/actions/refreshPrices";
 
 // =============================================================================
 // Add Transaction
@@ -38,6 +39,7 @@ export async function addTransaction(formData: FormData) {
     `;
 
     revalidatePath("/dashboard/transactions");
+    await refreshInvestmentPrices();
 
     return { success: true };
 
@@ -113,6 +115,7 @@ export async function deleteTransaction(id: number) {
     }
 
     revalidatePath("/dashboard/transactions");
+    await refreshInvestmentPrices();
 
     return { success: true };
 
@@ -160,6 +163,7 @@ export async function updateTransaction(id: number, formData: FormData) {
     }
 
     revalidatePath("/dashboard/transactions");
+    await refreshInvestmentPrices();
 
     return { success: true };
 

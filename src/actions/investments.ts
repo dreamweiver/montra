@@ -12,6 +12,7 @@ import { revalidatePath } from "next/cache";
 import { getAuthUser } from "@/actions/auth";
 import { extractErrorMessage } from "@/lib/utils";
 import type { Investment, InvestmentStats } from "@/types";
+import { refreshInvestmentPrices } from "@/actions/refreshPrices";
 
 export interface InvestmentPageData {
   investments: Investment[];
@@ -260,6 +261,8 @@ export async function updateInvestmentPrices(
 export async function getInvestmentPageData(): Promise<InvestmentPageData> {
   const user = await getAuthUser();
   if (!user) return { investments: [], stats: ZERO_STATS };
+
+  await refreshInvestmentPrices();
 
   const [investmentRows, statsRows] = await Promise.all([
     sql`

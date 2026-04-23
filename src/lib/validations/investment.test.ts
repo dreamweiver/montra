@@ -20,7 +20,7 @@ describe("investmentSchema", () => {
   });
 
   it("should pass without optional fields (symbol, notes)", () => {
-    const { symbol, notes, ...required } = validData;
+    const { symbol: _symbol, notes: _notes, ...required } = validData;
     const result = investmentSchema.safeParse(required);
     expect(result.success).toBe(true);
   });

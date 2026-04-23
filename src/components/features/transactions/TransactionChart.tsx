@@ -110,14 +110,14 @@ export default function TransactionChart({
         {/* Custom Legend */}
         <div className="flex flex-col gap-1 md:flex-row md:items-center md:gap-6">
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-green-500" />
+            <div className="w-4 h-2 rounded-full" style={{ background: "linear-gradient(90deg, #22c55e 0%, #16a34a 50%, #15803d 100%)" }} />
             <span className="text-sm font-medium">Income</span>
             <span className="text-sm text-green-600 font-bold">
               {formatCurrency(totalIncome)}
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 rounded bg-red-500" />
+            <div className="w-4 h-2 rounded-full" style={{ background: "linear-gradient(90deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%)" }} />
             <span className="text-sm font-medium">Expense</span>
             <span className="text-sm text-red-600 font-bold">
               {formatCurrency(totalExpense)}

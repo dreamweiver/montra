@@ -33,3 +33,11 @@ export type { ApiResponse } from "./api";
 export type { UserSettings } from "./settings";
 
 export type { Budget, BudgetStatus } from "./budget";
+
+export type {
+  Investment,
+  InvestmentWithGains,
+  InvestmentStats,
+  InvestmentType,
+  SymbolSearchResult,
+} from "./investment";

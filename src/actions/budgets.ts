@@ -12,6 +12,13 @@ import { revalidatePath } from "next/cache";
 import { getAuthUser } from "@/actions/auth";
 import { extractErrorMessage } from "@/lib/utils";
 import type { Budget, BudgetStatus } from "@/types/budget";
+import type { UserSettings } from "@/types/settings";
+
+export interface BudgetPageData {
+  budget: Budget | null;
+  status: BudgetStatus;
+  defaultCurrency: string;
+}
 
 // =============================================================================
 // Get Budget
@@ -136,4 +143,52 @@ export async function checkBudgetStatus(): Promise<{ success: boolean; data?: Bu
     console.error("Check budget status error:", error);
     return { success: false, error: message };
   }
+}
+
+// =============================================================================
+// Get Budget Page Data (consolidated)
+// =============================================================================
+export async function getBudgetPageData(): Promise<BudgetPageData> {
+  const user = await getAuthUser();
+  const empty: BudgetPageData = {
+    budget: null,
+    status: { hasBudget: false, spent: 0, limit: 0, percentage: 0, currency: "INR" },
+    defaultCurrency: "INR",
+  };
+
+  if (!user) return empty;
+
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+  const [budgetRows, spentRows, settingsRows] = await Promise.all([
+    sql`SELECT * FROM budgets WHERE user_id = ${user.id} LIMIT 1`,
+    sql`
+      SELECT COALESCE(SUM(amount::numeric), 0) as total
+      FROM transactions
+      WHERE user_id = ${user.id}
+        AND type = 'expense'
+        AND transaction_date >= ${startOfMonth.toISOString()}
+        AND transaction_date <= ${endOfMonth.toISOString()}
+    `,
+    sql`SELECT * FROM user_settings WHERE user_id = ${user.id} LIMIT 1`,
+  ]);
+
+  const budget = budgetRows.length > 0 ? (budgetRows[0] as Budget) : null;
+  const defaultCurrency = (settingsRows[0]?.default_currency as string) || "INR";
+
+  if (!budget) {
+    return { budget: null, status: empty.status, defaultCurrency };
+  }
+
+  const limit = parseFloat(budget.monthly_limit);
+  const spent = parseFloat(spentRows[0]?.total || "0");
+  const percentage = limit > 0 ? Math.round((spent / limit) * 100) : 0;
+
+  return {
+    budget,
+    status: { hasBudget: true, spent, limit, percentage, currency: budget.currency },
+    defaultCurrency,
+  };
 }

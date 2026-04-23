@@ -11,6 +11,7 @@ import { sql } from "@/db/neon";
 import { revalidatePath } from "next/cache";
 import { getAuthUser } from "@/actions/auth";
 import { extractErrorMessage } from "@/lib/utils";
+import { refreshInvestmentPrices } from "@/actions/refreshPrices";
 
 // =============================================================================
 // Add Transaction
@@ -38,6 +39,7 @@ export async function addTransaction(formData: FormData) {
     `;
 
     revalidatePath("/dashboard/transactions");
+    await refreshInvestmentPrices();
 
     return { success: true };
 
@@ -66,90 +68,20 @@ export async function getTransactions(filters?: TransactionFiltersParam) {
       return { success: false, error: "You must be logged in", data: [] };
     }
 
-    // Build dynamic query based on filters
-    let transactions;
+    const hasDateRange = filters?.startDate && filters?.endDate;
+    const typeFilter = filters?.type && filters.type !== "all" ? filters.type : null;
+    const categoryFilter = filters?.category && filters.category !== "all" ? filters.category : null;
 
-    if (filters?.startDate && filters?.endDate && filters?.type && filters?.type !== "all" && filters?.category && filters.category !== "all") {
-      // All filters
-      transactions = await sql`
-        SELECT id, amount, type, description, category, currency, transaction_date, created_at
-        FROM transactions
-        WHERE user_id = ${user.id}
-          AND transaction_date >= ${filters.startDate}
-          AND transaction_date <= ${filters.endDate}
-          AND type = ${filters.type}
-          AND category = ${filters.category}
-        ORDER BY transaction_date DESC, created_at DESC
-      `;
-    } else if (filters?.startDate && filters?.endDate && filters?.type && filters.type !== "all") {
-      // Date + type
-      transactions = await sql`
-        SELECT id, amount, type, description, category, currency, transaction_date, created_at
-        FROM transactions
-        WHERE user_id = ${user.id}
-          AND transaction_date >= ${filters.startDate}
-          AND transaction_date <= ${filters.endDate}
-          AND type = ${filters.type}
-        ORDER BY transaction_date DESC, created_at DESC
-      `;
-    } else if (filters?.startDate && filters?.endDate && filters?.category && filters.category !== "all") {
-      // Date + category
-      transactions = await sql`
-        SELECT id, amount, type, description, category, currency, transaction_date, created_at
-        FROM transactions
-        WHERE user_id = ${user.id}
-          AND transaction_date >= ${filters.startDate}
-          AND transaction_date <= ${filters.endDate}
-          AND category = ${filters.category}
-        ORDER BY transaction_date DESC, created_at DESC
-      `;
-    } else if (filters?.startDate && filters?.endDate) {
-      // Date only
-      transactions = await sql`
-        SELECT id, amount, type, description, category, currency, transaction_date, created_at
-        FROM transactions
-        WHERE user_id = ${user.id}
-          AND transaction_date >= ${filters.startDate}
-          AND transaction_date <= ${filters.endDate}
-        ORDER BY transaction_date DESC, created_at DESC
-      `;
-    } else if (filters?.type && filters.type !== "all" && filters?.category && filters.category !== "all") {
-      // Type + category
-      transactions = await sql`
-        SELECT id, amount, type, description, category, currency, transaction_date, created_at
-        FROM transactions
-        WHERE user_id = ${user.id}
-          AND type = ${filters.type}
-          AND category = ${filters.category}
-        ORDER BY transaction_date DESC, created_at DESC
-      `;
-    } else if (filters?.type && filters.type !== "all") {
-      // Type only
-      transactions = await sql`
-        SELECT id, amount, type, description, category, currency, transaction_date, created_at
-        FROM transactions
-        WHERE user_id = ${user.id}
-          AND type = ${filters.type}
-        ORDER BY transaction_date DESC, created_at DESC
-      `;
-    } else if (filters?.category && filters.category !== "all") {
-      // Category only
-      transactions = await sql`
-        SELECT id, amount, type, description, category, currency, transaction_date, created_at
-        FROM transactions
-        WHERE user_id = ${user.id}
-          AND category = ${filters.category}
-        ORDER BY transaction_date DESC, created_at DESC
-      `;
-    } else {
-      // No filters
-      transactions = await sql`
-        SELECT id, amount, type, description, category, currency, transaction_date, created_at
-        FROM transactions
-        WHERE user_id = ${user.id}
-        ORDER BY transaction_date DESC, created_at DESC
-      `;
-    }
+    const transactions = await sql`
+      SELECT id, amount, type, description, category, currency, transaction_date, created_at
+      FROM transactions
+      WHERE user_id = ${user.id}
+        AND (${!hasDateRange}::boolean OR transaction_date >= ${filters?.startDate ?? null})
+        AND (${!hasDateRange}::boolean OR transaction_date <= ${filters?.endDate ?? null})
+        AND (${!typeFilter}::boolean OR type = ${typeFilter})
+        AND (${!categoryFilter}::boolean OR category = ${categoryFilter})
+      ORDER BY transaction_date DESC, created_at DESC
+    `;
 
     return { success: true, data: transactions };
 
@@ -183,6 +115,7 @@ export async function deleteTransaction(id: number) {
     }
 
     revalidatePath("/dashboard/transactions");
+    await refreshInvestmentPrices();
 
     return { success: true };
 
@@ -230,6 +163,7 @@ export async function updateTransaction(id: number, formData: FormData) {
     }
 
     revalidatePath("/dashboard/transactions");
+    await refreshInvestmentPrices();
 
     return { success: true };
 

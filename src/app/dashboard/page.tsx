@@ -7,17 +7,9 @@
 // =============================================================================
 
 import { useState, useEffect, useCallback } from "react";
-import { Loader2, Target } from "lucide-react";
-import {
-  getDashboardStats,
-  getSpendingByCategory,
-  getMonthlyTrend,
-  getRecentTransactions,
-  type DashboardStats,
-  type CategorySpending,
-  type MonthlyTrend,
-} from "@/actions/stats";
-import { checkBudgetStatus } from "@/actions/budgets";
+import { Loader2, Target, TrendingUp } from "lucide-react";
+import { getDashboardData, type DashboardData } from "@/actions/dashboard";
+import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
 import {
   StatsCards,
@@ -25,27 +17,6 @@ import {
   MonthlyTrendChart,
   RecentTransactions,
 } from "@/components/features/dashboard";
-import type { BudgetStatus } from "@/types";
-
-// =============================================================================
-// Types
-// =============================================================================
-interface DashboardData {
-  stats: DashboardStats;
-  spending: CategorySpending[];
-  trend: MonthlyTrend[];
-  budgetStatus: BudgetStatus | null;
-  recentTransactions: Array<{
-    id: number;
-    amount: string;
-    type: "income" | "expense";
-    description: string | null;
-    category: string | null;
-    transaction_date: string;
-    category_icon?: string | null;
-    category_color?: string | null;
-  }>;
-}
 
 // =============================================================================
 // Main Component
@@ -54,25 +25,10 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<DashboardData | null>(null);
 
-  // Fetch all dashboard data
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [stats, spending, trend, recentTransactions, budgetResult] = await Promise.all([
-        getDashboardStats(),
-        getSpendingByCategory(),
-        getMonthlyTrend(),
-        getRecentTransactions(5),
-        checkBudgetStatus(),
-      ]);
-
-      setData({
-        stats,
-        spending,
-        trend,
-        budgetStatus: budgetResult.success && budgetResult.data?.hasBudget ? budgetResult.data : null,
-        recentTransactions: recentTransactions as DashboardData["recentTransactions"],
-      });
+      setData(await getDashboardData());
     } catch (error) {
       console.error("Failed to fetch dashboard data:", error);
     } finally {
@@ -149,6 +105,30 @@ export default function DashboardPage() {
             {formatCurrency(data.budgetStatus.spent, data.budgetStatus.currency)} of {formatCurrency(data.budgetStatus.limit, data.budgetStatus.currency)} spent
           </p>
         </div>
+      )}
+
+      {/* Investment Summary */}
+      {data?.investmentStats && (
+        <Link href="/dashboard/investments" className="block">
+          <div className="rounded-lg border bg-card p-4 hover:bg-muted/50 transition-colors cursor-pointer">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Investments</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-sm font-medium">
+                  {formatCurrency(data.investmentStats.currentValue)}
+                </span>
+                <span className={`text-sm font-medium ${
+                  data.investmentStats.gainPercentage >= 0 ? "text-green-600" : "text-red-600"
+                }`}>
+                  {data.investmentStats.gainPercentage >= 0 ? "+" : ""}{data.investmentStats.gainPercentage}%
+                </span>
+              </div>
+            </div>
+          </div>
+        </Link>
       )}
 
       {/* Charts Row */}

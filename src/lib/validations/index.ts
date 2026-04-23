@@ -16,3 +16,8 @@ export {
   recurringTransactionSchema,
   type RecurringTransactionFormData,
 } from "./recurring";
+
+export {
+  investmentSchema,
+  type InvestmentFormData,
+} from "./investment";

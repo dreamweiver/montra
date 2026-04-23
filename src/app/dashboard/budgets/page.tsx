@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getBudget, upsertBudget, checkBudgetStatus } from "@/actions/budgets";
-import { getUserSettings } from "@/actions/settings";
+import { getBudgetPageData, upsertBudget, checkBudgetStatus } from "@/actions/budgets";
 import { SUPPORTED_CURRENCIES } from "@/lib/constants";
 import { formatCurrency } from "@/lib/utils";
 import { toast } from "sonner";
@@ -25,24 +24,20 @@ export default function BudgetsPage() {
 
   useEffect(() => {
     async function load() {
-      const [budgetResult, statusResult, settingsResult] = await Promise.all([
-        getBudget(),
-        checkBudgetStatus(),
-        getUserSettings(),
-      ]);
+      const { budget, status: budgetStatus, defaultCurrency } = await getBudgetPageData();
 
-      if (budgetResult.success && budgetResult.data) {
-        setMonthlyLimit(budgetResult.data.monthly_limit);
-        setCurrency(budgetResult.data.currency);
-        setSavedLimit(budgetResult.data.monthly_limit);
-        setSavedCurrency(budgetResult.data.currency);
-      } else if (settingsResult.success && settingsResult.data) {
-        setCurrency(settingsResult.data.default_currency);
-        setSavedCurrency(settingsResult.data.default_currency);
+      if (budget) {
+        setMonthlyLimit(budget.monthly_limit);
+        setCurrency(budget.currency);
+        setSavedLimit(budget.monthly_limit);
+        setSavedCurrency(budget.currency);
+      } else {
+        setCurrency(defaultCurrency);
+        setSavedCurrency(defaultCurrency);
       }
 
-      if (statusResult.success && statusResult.data) {
-        setStatus(statusResult.data);
+      if (budgetStatus.hasBudget) {
+        setStatus(budgetStatus);
       }
 
       setLoading(false);

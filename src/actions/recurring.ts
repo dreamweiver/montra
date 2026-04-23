@@ -11,6 +11,11 @@ import { revalidatePath } from "next/cache";
 import { getAuthUser } from "@/actions/auth";
 import type { RecurringTransaction } from "@/types/recurring";
 
+export interface RecurringPageData {
+  items: RecurringTransaction[];
+  processed: number;
+}
+
 // ---------------------------------------------
 // Helper: Format date as YYYY-MM-DD (timezone-safe)
 // ---------------------------------------------
@@ -276,4 +281,13 @@ function advanceDate(date: Date, frequency: string): Date {
   }
 
   return next;
+}
+
+// =============================================================================
+// Get Recurring Page Data (consolidated)
+// =============================================================================
+export async function getRecurringPageData(): Promise<RecurringPageData> {
+  const { processed } = await processDueRecurringTransactions();
+  const items = await getRecurringTransactions();
+  return { items, processed };
 }

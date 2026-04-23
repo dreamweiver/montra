@@ -37,3 +37,10 @@ export interface InvestmentStats {
   gainPercentage: number;
   holdingCount: number;
 }
+
+export interface SymbolSearchResult {
+  symbol: string;
+  name: string;
+  exchange: string;
+  quoteType: string;
+}

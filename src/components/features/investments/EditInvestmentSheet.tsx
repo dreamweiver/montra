@@ -25,7 +25,7 @@ import { toast } from "sonner";
 import { updateInvestment } from "@/actions/investments";
 import { investmentSchema, type InvestmentFormData } from "@/lib/validations";
 import { INVESTMENT_TYPES, LIVE_FETCH_TYPES, SUPPORTED_CURRENCIES } from "@/lib/constants";
-import { LoadingOverlay, CurrencySelector } from "@/components/shared";
+import { LoadingOverlay, CurrencySelector, SymbolSearch } from "@/components/shared";
 import { extractErrorMessage } from "@/lib/utils";
 import type { Investment } from "@/types";
 
@@ -212,24 +212,12 @@ export default function EditInvestmentSheet({
 
           {/* ----- Symbol (conditional: only for stock, mutual_fund, crypto) ----- */}
           {LIVE_FETCH_TYPES.includes(type) && (
-            <div className="space-y-2">
-              <Label htmlFor="edit-symbol" className="text-base font-medium">
-                Ticker Symbol <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="edit-symbol"
-                type="text"
-                placeholder="e.g. GOOGL, AAPL, BTC-USD"
-                {...register("symbol")}
-                className={`h-12 text-base ${errors.symbol ? "border-red-500 focus-visible:ring-red-500" : ""}`}
-              />
-              <p className="text-xs text-muted-foreground">
-                Required for live price refresh. Use Yahoo Finance ticker format.
-              </p>
-              {errors.symbol && (
-                <p className="text-sm text-red-500">{errors.symbol.message}</p>
-              )}
-            </div>
+            <SymbolSearch
+              control={control}
+              name="symbol"
+              error={errors.symbol?.message}
+              disabled={loading}
+            />
           )}
 
           {/* ----- Currency Selector ----- */}

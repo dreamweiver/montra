@@ -11,3 +11,4 @@ export { default as ConfirmDialog } from "./ConfirmDialog";
 export { default as ThemeToggle } from "./ThemeToggle";
 export { default as CurrencySelector } from "./CurrencySelector";
 export { default as BudgetIndicator } from "./BudgetIndicator";
+export { default as SymbolSearch } from "./SymbolSearch";

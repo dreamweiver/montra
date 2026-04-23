@@ -133,6 +133,7 @@ export default function EditInvestmentSheet({
       }
 
       toast.success("Investment updated successfully!");
+      onOpenChange(false);
       onSuccess?.();
 
     } catch (error: unknown) {

@@ -432,7 +432,10 @@ export default function InvestmentsPage() {
       <EditInvestmentSheet
         investment={editingInvestment}
         open={editSheetOpen}
-        onOpenChange={setEditSheetOpen}
+        onOpenChange={(open) => {
+          setEditSheetOpen(open);
+          if (!open) setEditingInvestment(null);
+        }}
         onSuccess={fetchData}
       />
 

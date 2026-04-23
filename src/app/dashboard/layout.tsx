@@ -397,7 +397,7 @@ export default function DashboardLayout({
     { icon: FolderOpen, label: "Categories", path: "/dashboard/categories" },
     { icon: CalendarClock, label: "Recurring", path: "/dashboard/recurring" },
     { icon: Target, label: "Budgets", path: "/dashboard/budgets" },
-    { icon: TrendingUp, label: "Investments", path: "" },
+    { icon: TrendingUp, label: "Investments", path: "/dashboard/investments" },
     { icon: Settings, label: "Settings", path: "/dashboard/settings" },
   ];
 

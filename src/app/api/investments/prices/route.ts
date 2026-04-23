@@ -15,7 +15,7 @@ export async function GET(request: Request) {
   await Promise.all(
     symbols.map(async (symbol) => {
       try {
-        const quote = await yahooFinance.quote(symbol);
+        const quote = await yahooFinance.quote(symbol) as { regularMarketPrice?: number | null };
         if (quote.regularMarketPrice != null) {
           prices[symbol] = quote.regularMarketPrice;
         }

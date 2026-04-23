@@ -208,7 +208,13 @@ export default function InvestmentsPage() {
       </div>
 
       {/* Stats Cards */}
-      <InvestmentStatsCards stats={stats} />
+      <InvestmentStatsCards
+        totalInvested={stats.totalInvested}
+        currentValue={stats.currentValue}
+        totalGainLoss={stats.totalGainLoss}
+        gainPercentage={stats.gainPercentage}
+        holdingCount={stats.holdingCount}
+      />
 
       {/* Action Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">

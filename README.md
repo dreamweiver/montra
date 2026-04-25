@@ -1,13 +1,14 @@
 <div align="center">
 
-# MonTra
+# Montra
 
-### Money + Tracker = MonTra
+### Money + Tracker = Montra
 
 **Track smart. Spend wise. Grow wealth.**
 
 A modern personal finance app built with Next.js 16 to help you track income, expenses, budgets, and investments.
 
+[![Live Demo](https://img.shields.io/badge/Live_Demo-Montra-22c55e?style=for-the-badge&logo=vercel)](https://montra-git-main-dreamweivermanoj-9161s-projects.vercel.app/)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -19,17 +20,18 @@ A modern personal finance app built with Next.js 16 to help you track income, ex
 
 ## Features
 
-- **Authentication** — Supabase Auth with email/password
+- **Authentication** — Supabase Auth with email/password, auto-logout after 15 min idle
+- **User Profiles** — First name, last name, date of birth with 18+ age validation
 - **Transactions** — Log income and expenses with categories, filter by date/type/category, export to CSV
 - **Categories** — Custom income & expense categories with icons, colors, and default seed
 - **Recurring Transactions** — Auto-generated daily, weekly, monthly, or yearly entries with pause/resume
 - **Budgets** — Monthly spending limits with progress tracking and dashboard alerts
-- **Investments** — Track stocks, mutual funds, crypto, gold, bonds, FDs, and real estate with live Yahoo Finance price refresh and symbol search typeahead
+- **Investments** — Track stocks, mutual funds, crypto, gold, bonds, FDs, and real estate with live Yahoo Finance price refresh, currency conversion, and symbol search typeahead
 - **Dashboard** — Financial overview with stats cards, monthly trend bar chart, spending donut chart, recent transactions, budget progress, and investment summary
-- **Multi-Currency** — 11 currencies (INR, USD, EUR, GBP, JPY, and more)
+- **Multi-Currency** — 11 currencies (INR, USD, EUR, GBP, JPY, and more) with automatic Yahoo Finance forex conversion
 - **Dark/Light Theme** — System-aware toggle with persistent preference
 - **Responsive** — Mobile-first layout with sidebar navigation and mobile drawer
-- **277 tests** — Vitest + React Testing Library across 24 test files
+- **266 tests** — Vitest + React Testing Library across 23 test files
 
 ---
 
@@ -48,6 +50,7 @@ A modern personal finance app built with Next.js 16 to help you track income, ex
 | **Forms** | React Hook Form + Zod |
 | **Market Data** | yahoo-finance2 |
 | **Testing** | Vitest + React Testing Library |
+| **Deployment** | Vercel |
 
 ---
 
@@ -58,6 +61,7 @@ src/
 ├── app/
 │   ├── (auth)/                # Login, register pages
 │   ├── api/investments/       # Yahoo Finance price + search API routes
+│   ├── contact/               # Public contact page
 │   └── dashboard/
 │       ├── page.tsx           # Dashboard overview
 │       ├── transactions/      # Transaction list + CRUD
@@ -65,7 +69,8 @@ src/
 │       ├── recurring/         # Recurring transactions
 │       ├── budgets/           # Budget settings + progress
 │       ├── investments/       # Investment portfolio
-│       └── settings/          # User preferences
+│       ├── settings/          # User preferences + profile
+│       └── contact/           # Contact page (authenticated)
 ├── actions/                   # Server Actions (consolidated per-page data fetches)
 ├── components/
 │   ├── features/              # Feature-specific components
@@ -90,7 +95,7 @@ src/
 ### Installation
 
 ```bash
-git clone https://github.com/yourusername/montra.git
+git clone https://github.com/dreamweiver/montra.git
 cd montra
 npm install
 ```
@@ -131,33 +136,47 @@ npm run test:run        # Single run
 npm run test:coverage   # With coverage report
 ```
 
-24 test files, 277 tests covering server actions, API routes, hooks, validations, and components.
+23 test files, 266 tests covering server actions, API routes, hooks, validations, and components.
 
 ---
 
 ## Roadmap
 
 ### Done
-- [x] Authentication (Supabase email/password)
+- [x] Authentication (Supabase email/password) with idle session timeout
+- [x] User profiles with name, DOB, and age validation
 - [x] Transactions CRUD with filters, search, and CSV export
 - [x] Custom category management with icons and colors
 - [x] Recurring transactions (daily/weekly/monthly/yearly) with auto-processing
 - [x] Monthly budget goals with progress bars and alerts
 - [x] Investment tracking with 7 asset types
-- [x] Live price refresh via Yahoo Finance API
+- [x] Live price refresh via Yahoo Finance API with currency conversion
 - [x] Symbol search typeahead for stocks/crypto/mutual funds
 - [x] Dashboard with consolidated single-call data fetch
 - [x] Multi-currency support (11 currencies)
 - [x] Dark/light theme with system detection
 - [x] Responsive mobile layout with sidebar drawer
 - [x] Consolidated server actions (single auth + parallel SQL per page)
+- [x] Deployed to Vercel
 
 ### Next
-- [ ] Deploy to Vercel
 - [ ] Portfolio allocation chart
 - [ ] Buy/sell transaction history per holding
 - [ ] Goal-based investment tracking
 - [ ] Import from CSV/broker statements
+
+---
+
+## Contact & Feedback
+
+Montra is created and maintained by **[Dreamweiver](https://github.com/dreamweiver)**.
+
+- **Live App** — [montra-git-main-dreamweivermanoj-9161s-projects.vercel.app](https://montra-git-main-dreamweivermanoj-9161s-projects.vercel.app/)
+- **Source Code** — [github.com/dreamweiver/montra](https://github.com/dreamweiver/montra)
+- **Report a Bug** — [Open an issue](https://github.com/dreamweiver/montra/issues/new)
+- **Feature Requests & Feedback** — [View all issues](https://github.com/dreamweiver/montra/issues)
+
+Found a bug or have a suggestion? Please [open a GitHub issue](https://github.com/dreamweiver/montra/issues/new) — it helps us improve Montra for everyone.
 
 ---
 

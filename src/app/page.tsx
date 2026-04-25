@@ -8,7 +8,7 @@ export default function Home() {
       {/* Hero section */}
       <header className="border-b bg-gradient-to-b from-background to-muted/40">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <div className="text-xl font-bold">MonTra</div>
+          <div className="text-xl font-bold">Montra</div>
           <div className="flex gap-4">
             <Button variant="outline" asChild>
               <Link href="/login">Login</Link>
@@ -46,7 +46,7 @@ export default function Home() {
       <section className="border-t bg-muted/40 py-16 md:py-24">
         <div className="container px-4">
           <h2 className="mb-12 text-center text-3xl font-bold md:text-4xl">
-            Why use MonTra?
+            Why use Montra?
           </h2>
 
           <div className="grid gap-8 md:grid-cols-3">
@@ -85,6 +85,13 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="border-t py-6 text-center text-sm text-muted-foreground">
+        <Link href="/contact" className="hover:text-foreground hover:underline">
+          Contact Us
+        </Link>
+      </footer>
     </div>
   );
 }

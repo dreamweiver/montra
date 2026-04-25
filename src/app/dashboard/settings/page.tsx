@@ -8,6 +8,7 @@ import { UserSettings } from "@/types";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ThemeToggle } from "@/components/shared";
@@ -19,22 +20,35 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [settings, setSettings] = useState<UserSettings | null>(null);
+
+  // Profile fields
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+
+  // Preference fields
   const [defaultCurrency, setDefaultCurrency] = useState("INR");
   const [dateFormat, setDateFormat] = useState("dd/MM/yyyy");
+
   const { resolvedTheme } = useTheme();
 
   useEffect(() => {
     async function load() {
-      // Get user email from Supabase session
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user?.email) {
         setUserEmail(session.user.email);
       }
 
-      // Get saved settings
       const result = await getUserSettings();
       if (result.success && result.data) {
         setSettings(result.data);
+        setFirstName(result.data.first_name || "");
+        setLastName(result.data.last_name || "");
+        setDateOfBirth(
+          result.data.date_of_birth
+            ? new Date(result.data.date_of_birth).toISOString().split("T")[0]
+            : ""
+        );
         setDefaultCurrency(result.data.default_currency);
         setDateFormat(result.data.date_format);
       }
@@ -45,10 +59,13 @@ export default function SettingsPage() {
     load();
   }, []);
 
-  const handleSavePreferences = async () => {
+  const handleSave = async () => {
     setSaving(true);
     try {
       const formData = new FormData();
+      formData.append("first_name", firstName);
+      formData.append("last_name", lastName);
+      formData.append("date_of_birth", dateOfBirth);
       formData.append("default_currency", defaultCurrency);
       formData.append("date_format", dateFormat);
 
@@ -58,6 +75,20 @@ export default function SettingsPage() {
         toast.error("Failed to save", { description: result.error });
         return;
       }
+
+      // Update local settings reference for change detection
+      setSettings((prev) =>
+        prev
+          ? {
+              ...prev,
+              first_name: firstName || null,
+              last_name: lastName || null,
+              date_of_birth: dateOfBirth || null,
+              default_currency: defaultCurrency,
+              date_format: dateFormat,
+            }
+          : prev
+      );
 
       toast.success("Settings saved");
     } catch {
@@ -83,7 +114,14 @@ export default function SettingsPage() {
 
   const hasChanges =
     settings &&
-    (defaultCurrency !== settings.default_currency || dateFormat !== settings.date_format);
+    (firstName !== (settings.first_name || "") ||
+      lastName !== (settings.last_name || "") ||
+      dateOfBirth !==
+        (settings.date_of_birth
+          ? new Date(settings.date_of_birth).toISOString().split("T")[0]
+          : "") ||
+      defaultCurrency !== settings.default_currency ||
+      dateFormat !== settings.date_format);
 
   if (loading) {
     return (
@@ -100,7 +138,47 @@ export default function SettingsPage() {
         <p className="text-muted-foreground">Manage your account and preferences</p>
       </div>
 
-      {/* Account / Profile */}
+      {/* Profile */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Profile</CardTitle>
+          <CardDescription>Your personal information</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="firstName">First Name</Label>
+              <Input
+                id="firstName"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="John"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lastName">Last Name</Label>
+              <Input
+                id="lastName"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="Doe"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="dob">Date of Birth</Label>
+            <Input
+              id="dob"
+              type="date"
+              value={dateOfBirth}
+              onChange={(e) => setDateOfBirth(e.target.value)}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Account */}
       <Card>
         <CardHeader>
           <CardTitle>Account</CardTitle>
@@ -167,22 +245,23 @@ export default function SettingsPage() {
               </Select>
             </div>
           </div>
-
-          <div className="pt-2">
-            <Button
-              onClick={handleSavePreferences}
-              disabled={saving || !hasChanges}
-            >
-              {saving ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Save className="mr-2 h-4 w-4" />
-              )}
-              Save Preferences
-            </Button>
-          </div>
         </CardContent>
       </Card>
+
+      {/* Save Button */}
+      <div>
+        <Button
+          onClick={handleSave}
+          disabled={saving || !hasChanges}
+        >
+          {saving ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : (
+            <Save className="mr-2 h-4 w-4" />
+          )}
+          Save Changes
+        </Button>
+      </div>
 
       {/* Display / Theme */}
       <Card>

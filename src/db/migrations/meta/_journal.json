@@ -50,6 +50,13 @@
       "when": 1776925298985,
       "tag": "0006_talented_shooting_star",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1777106340181,
+      "tag": "0007_robust_sumo",
+      "breakpoints": true
     }
   ]
 }

@@ -10,6 +10,7 @@ import type {
 import type { BudgetStatus } from "@/types/budget";
 import type { InvestmentStats } from "@/types";
 import { refreshInvestmentPrices } from "@/actions/refreshPrices";
+import { seedDefaultCategories } from "@/actions/categories";
 
 export interface DashboardData {
   stats: DashboardStats;
@@ -29,13 +30,6 @@ export interface DashboardData {
   investmentStats: InvestmentStats | null;
 }
 
-const ZERO_INVESTMENT_STATS: InvestmentStats = {
-  totalInvested: 0,
-  currentValue: 0,
-  totalGainLoss: 0,
-  gainPercentage: 0,
-  holdingCount: 0,
-};
 
 export async function getDashboardData(): Promise<DashboardData> {
   const user = await getAuthUser();
@@ -53,7 +47,7 @@ export async function getDashboardData(): Promise<DashboardData> {
 
   const userId = user.id;
 
-  await refreshInvestmentPrices();
+  await Promise.all([seedDefaultCategories(), refreshInvestmentPrices()]);
 
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);

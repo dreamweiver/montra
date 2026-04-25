@@ -24,7 +24,7 @@ import { updateRecurringTransaction } from "@/actions/recurring";
 import { getCategories } from "@/actions/categories";
 import { recurringTransactionSchema, type RecurringTransactionFormData } from "@/lib/validations";
 import { LoadingOverlay, CurrencySelector } from "@/components/shared";
-import { FREQUENCY_OPTIONS, SUPPORTED_CURRENCIES } from "@/lib/constants";
+import { FREQUENCY_OPTIONS, SUPPORTED_CURRENCIES, TRANSACTION_CATEGORIES } from "@/lib/constants";
 import type { Category, RecurringTransaction } from "@/types";
 
 // =============================================================================
@@ -194,11 +194,19 @@ export default function EditRecurringSheet({
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map((cat) => (
-                      <SelectItem key={cat.id} value={cat.name}>
-                        {cat.icon} {cat.name}
-                      </SelectItem>
-                    ))}
+                    {categories.length > 0 ? (
+                      categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.name}>
+                          {cat.icon} {cat.name}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      TRANSACTION_CATEGORIES.map((cat) => (
+                        <SelectItem key={cat} value={cat}>
+                          {cat}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               )}

@@ -12,7 +12,6 @@ import { revalidatePath } from "next/cache";
 import { getAuthUser } from "@/actions/auth";
 import { extractErrorMessage } from "@/lib/utils";
 import type { Budget, BudgetStatus } from "@/types/budget";
-import type { UserSettings } from "@/types/settings";
 
 export interface BudgetPageData {
   budget: Budget | null;

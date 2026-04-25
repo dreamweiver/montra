@@ -5,7 +5,7 @@
 // Each table is defined using pgTable() and exported for use.
 // =============================================================================
 
-import { pgTable, serial, text, numeric, timestamp, uuid, integer, boolean, unique } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, numeric, timestamp, uuid, integer, boolean } from "drizzle-orm/pg-core";
 
 // =============================================================================
 // Categories Table

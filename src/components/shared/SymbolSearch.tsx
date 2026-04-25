@@ -30,9 +30,8 @@ function SymbolSearchInput({
   const { results, isLoading } = useSymbolSearch(inputValue);
 
   // Sync field value -> input value (for edit mode pre-population)
-  useEffect(() => {
-    setInputValue(field.value || "");
-  }, [field.value]);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { setInputValue(field.value || ""); }, [field.value]);
 
   const showPopover = open && inputValue.length >= 2 && (results.length > 0 || isLoading);
 

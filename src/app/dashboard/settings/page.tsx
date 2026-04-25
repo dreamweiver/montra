@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ThemeToggle } from "@/components/shared";
-import { Loader2, Mail, Save, KeyRound, User } from "lucide-react";
+import { Loader2, Mail, Save, KeyRound } from "lucide-react";
 import { useTheme } from "next-themes";
 
 export default function SettingsPage() {

@@ -20,7 +20,8 @@ describe("investmentSchema", () => {
   });
 
   it("should pass without optional fields (symbol, notes)", () => {
-    const { symbol: _symbol, notes: _notes, ...required } = validData;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { symbol: _, notes: __, ...required } = validData;
     const result = investmentSchema.safeParse(required);
     expect(result.success).toBe(true);
   });

@@ -30,13 +30,6 @@ export interface DashboardData {
   investmentStats: InvestmentStats | null;
 }
 
-const ZERO_INVESTMENT_STATS: InvestmentStats = {
-  totalInvested: 0,
-  currentValue: 0,
-  totalGainLoss: 0,
-  gainPercentage: 0,
-  holdingCount: 0,
-};
 
 export async function getDashboardData(): Promise<DashboardData> {
   const user = await getAuthUser();

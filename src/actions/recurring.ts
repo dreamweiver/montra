@@ -287,7 +287,102 @@ function advanceDate(date: Date, frequency: string): Date {
 // Get Recurring Page Data (consolidated)
 // =============================================================================
 export async function getRecurringPageData(): Promise<RecurringPageData> {
-  const { processed } = await processDueRecurringTransactions();
-  const items = await getRecurringTransactions();
-  return { items, processed };
+  try {
+    const user = await getAuthUser();
+    if (!user) return { items: [], processed: 0 };
+
+    const now = new Date();
+    const todayStr = toDateString(now);
+
+    // Fetch due items and all items in parallel
+    const [dueItems, allItems] = await Promise.all([
+      sql`
+        SELECT * FROM recurring_transactions
+        WHERE user_id = ${user.id}
+          AND is_active = true
+          AND next_date <= ${todayStr}
+          AND (end_date IS NULL OR end_date >= ${todayStr})
+      `,
+      sql`
+        SELECT * FROM recurring_transactions
+        WHERE user_id = ${user.id}
+        ORDER BY next_date ASC
+      `,
+    ]);
+
+    if (dueItems.length === 0) {
+      return { items: allItems as RecurringTransaction[], processed: 0 };
+    }
+
+    // Process due items — batch all inserts and updates
+    const inserts: { userId: string; amount: string; type: string; description: string | null; category: string; currency: string; date: string }[] = [];
+    const updates: { id: number; nextDate: string; deactivate: boolean }[] = [];
+
+    for (const item of dueItems) {
+      let nextDate = new Date(item.next_date);
+
+      while (nextDate <= now) {
+        inserts.push({
+          userId: user.id,
+          amount: item.amount,
+          type: item.type,
+          description: item.description,
+          category: item.category,
+          currency: item.currency || "INR",
+          date: toDateString(nextDate),
+        });
+        nextDate = advanceDate(nextDate, item.frequency as string);
+      }
+
+      const endDate = item.end_date ? new Date(item.end_date) : null;
+      updates.push({
+        id: item.id,
+        nextDate: toDateString(nextDate),
+        deactivate: endDate !== null && nextDate > endDate,
+      });
+    }
+
+    // Execute all inserts in parallel
+    await Promise.all(
+      inserts.map((ins) =>
+        sql`
+          INSERT INTO transactions (user_id, amount, type, description, category, currency, transaction_date)
+          VALUES (${ins.userId}, ${ins.amount}, ${ins.type}, ${ins.description}, ${ins.category}, ${ins.currency}, ${ins.date})
+        `
+      )
+    );
+
+    // Execute all updates in parallel
+    await Promise.all(
+      updates.map((upd) =>
+        upd.deactivate
+          ? sql`
+              UPDATE recurring_transactions
+              SET is_active = false, next_date = ${upd.nextDate}
+              WHERE id = ${upd.id} AND user_id = ${user.id}
+            `
+          : sql`
+              UPDATE recurring_transactions
+              SET next_date = ${upd.nextDate}
+              WHERE id = ${upd.id} AND user_id = ${user.id}
+            `
+      )
+    );
+
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/transactions");
+    revalidatePath("/dashboard/recurring");
+
+    // Re-fetch to get updated state
+    const updatedItems = await sql`
+      SELECT * FROM recurring_transactions
+      WHERE user_id = ${user.id}
+      ORDER BY next_date ASC
+    `;
+
+    return { items: updatedItems as RecurringTransaction[], processed: inserts.length };
+  } catch (error) {
+    console.error("Failed to load recurring page data:", error);
+    return { items: [], processed: 0 };
+  }
 }

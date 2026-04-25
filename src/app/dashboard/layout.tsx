@@ -1,14 +1,21 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
+import { getUserSettings } from "@/actions/settings";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { LogOut, Home, CreditCard, TrendingUp, Settings, Menu, FolderOpen, CalendarClock, Target, X } from "lucide-react";
+import { LogOut, Home, CreditCard, TrendingUp, Settings, Menu, FolderOpen, CalendarClock, Target, X, HelpCircle } from "lucide-react";
 import { ThemeToggle, BudgetIndicator } from "@/components/shared";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+
+// =============================================================================
+// Constants
+// =============================================================================
+const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
+const ACTIVITY_EVENTS = ["mousedown", "keydown", "touchstart", "scroll"] as const;
 
 const navItems = [
   { icon: Home, label: "Dashboard", path: "/dashboard" },
@@ -18,8 +25,12 @@ const navItems = [
   { icon: Target, label: "Budgets", path: "/dashboard/budgets" },
   { icon: TrendingUp, label: "Investments", path: "/dashboard/investments" },
   { icon: Settings, label: "Settings", path: "/dashboard/settings" },
+  { icon: HelpCircle, label: "Contact Us", path: "/dashboard/contact" },
 ];
 
+// =============================================================================
+// Main Component
+// =============================================================================
 export default function DashboardLayout({
   children,
 }: {
@@ -30,7 +41,48 @@ export default function DashboardLayout({
   const [isLoading, setIsLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userName, setUserName] = useState<string | null>(null);
+  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // ---------------------------------------------------------------------------
+  // Logout
+  // ---------------------------------------------------------------------------
+  const handleLogout = useCallback(async () => {
+    await supabase.auth.signOut();
+    toast.success("Logged out successfully");
+    router.push("/login");
+  }, [router]);
+
+  // ---------------------------------------------------------------------------
+  // Idle Auto-Logout
+  // ---------------------------------------------------------------------------
+  const resetIdleTimer = useCallback(() => {
+    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+    idleTimerRef.current = setTimeout(() => {
+      toast.info("Session expired due to inactivity");
+      handleLogout();
+    }, IDLE_TIMEOUT_MS);
+  }, [handleLogout]);
+
+  useEffect(() => {
+    resetIdleTimer();
+
+    const handler = () => resetIdleTimer();
+    for (const event of ACTIVITY_EVENTS) {
+      window.addEventListener(event, handler, { passive: true });
+    }
+
+    return () => {
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
+      for (const event of ACTIVITY_EVENTS) {
+        window.removeEventListener(event, handler);
+      }
+    };
+  }, [resetIdleTimer]);
+
+  // ---------------------------------------------------------------------------
+  // Auth Check & Load User Name
+  // ---------------------------------------------------------------------------
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
@@ -38,16 +90,18 @@ export default function DashboardLayout({
         router.push("/login");
       } else {
         setIsLoading(false);
+        getUserSettings().then((result) => {
+          if (result.success && result.data?.first_name) {
+            setUserName(result.data.first_name);
+          }
+        });
       }
     });
   }, [router]);
 
-  const handleLogout = useCallback(async () => {
-    await supabase.auth.signOut();
-    toast.success("Logged out successfully");
-    router.push("/login");
-  }, [router]);
-
+  // ---------------------------------------------------------------------------
+  // Menu Toggle
+  // ---------------------------------------------------------------------------
   const handleMenuToggle = useCallback(() => {
     if (typeof window !== "undefined" && window.matchMedia("(min-width: 768px)").matches) {
       setSidebarOpen((prev) => !prev);
@@ -71,7 +125,7 @@ export default function DashboardLayout({
         <div className="flex h-full flex-col">
           <div className="p-6 border-b">
             <h2 className="text-2xl font-bold tracking-tight">
-              {sidebarOpen ? "Finance" : "F"}
+              {sidebarOpen ? "Montra" : "MT"}
             </h2>
           </div>
 
@@ -111,7 +165,7 @@ export default function DashboardLayout({
           <SheetTitle className="sr-only">Navigation</SheetTitle>
           <div className="flex h-full flex-col">
             <div className="p-6 border-b flex items-center justify-between">
-              <h2 className="text-2xl font-bold tracking-tight">Finance</h2>
+              <h2 className="text-2xl font-bold tracking-tight">Montra</h2>
               <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(false)}>
                 <X className="h-5 w-5" />
               </Button>
@@ -169,7 +223,7 @@ export default function DashboardLayout({
             </div>
             <ThemeToggle />
             <div className="hidden md:block text-sm text-muted-foreground">
-              Welcome back
+              Welcome back{userName ? `, ${userName}` : ""}
             </div>
           </div>
         </header>

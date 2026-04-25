@@ -7,8 +7,8 @@ import { Providers } from "@/components/providers";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "MonTra",
-  description: "MonTra (Money + Tracker) - Simple personal finance and investment tracker",
+  title: "Montra",
+  description: "Montra (Money + Tracker) - Simple personal finance and investment tracker",
 };
 
 export default function RootLayout({

@@ -8,7 +8,7 @@
 // Includes an animated loading overlay while the transaction is being saved.
 // =============================================================================
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -23,13 +23,12 @@ import { format } from "date-fns";
 import { CalendarIcon, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { addTransaction } from "@/actions/transactions";
-import { getCategories } from "@/actions/categories";
 import { getUserSettings } from "@/actions/settings";
 import { checkBudgetStatus } from "@/actions/budgets";
 import { transactionSchema, type TransactionFormData } from "@/lib/validations";
 import { TRANSACTION_CATEGORIES, SUPPORTED_CURRENCIES } from "@/lib/constants";
 import { LoadingOverlay, CurrencySelector } from "@/components/shared";
-import type { Category } from "@/types";
+import { useCategoryFetch } from "@/hooks/useCategoryFetch";
 import { extractErrorMessage } from "@/lib/utils";
 
 // =============================================================================
@@ -48,8 +47,6 @@ export default function AddTransactionSheet({ onSuccess }: AddTransactionSheetPr
   const [open, setOpen] = useState(false);
   // Loading state for API call
   const [loading, setLoading] = useState(false);
-  // Dynamic categories from database
-  const [categories, setCategories] = useState<Category[]>([]);
 
   // ---------------------------------------------
   // React Hook Form Setup
@@ -98,15 +95,8 @@ export default function AddTransactionSheet({ onSuccess }: AddTransactionSheetPr
   }, [setValue]);
 
   // Fetch categories when type changes
-  useEffect(() => {
-    const fetchCategories = async () => {
-      const data = await getCategories(type);
-      setCategories(data);
-      // Reset category selection when type changes
-      setValue("category", "");
-    };
-    fetchCategories();
-  }, [type, setValue]);
+  const resetCategory = useCallback(() => setValue("category", ""), [setValue]);
+  const categories = useCategoryFetch(type, resetCategory);
 
   // ---------------------------------------------
   // Form Submit Handler

@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ThemeToggle } from "@/components/shared";
+import { ThemeToggle, PageLoader } from "@/components/shared";
 import { Loader2, Mail, Save, KeyRound } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -124,11 +124,7 @@ export default function SettingsPage() {
       dateFormat !== settings.date_format);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <PageLoader className="h-full" />;
   }
 
   return (

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getBudgetPageData, upsertBudget, checkBudgetStatus } from "@/actions/budgets";
 import { SUPPORTED_CURRENCIES } from "@/lib/constants";
 import { formatCurrency } from "@/lib/utils";
+import { getBudgetProgressColor, getBudgetTextColor } from "@/lib/budget";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Save, Target } from "lucide-react";
 import type { BudgetStatus } from "@/types";
+import { PageLoader } from "@/components/shared";
 
 export default function BudgetsPage() {
   const [loading, setLoading] = useState(true);
@@ -78,26 +80,8 @@ export default function BudgetsPage() {
 
   const hasChanges = monthlyLimit !== savedLimit || currency !== savedCurrency;
 
-  const getProgressColor = (pct: number) => {
-    if (pct >= 100) return "bg-red-500";
-    if (pct >= 80) return "bg-orange-500";
-    if (pct >= 60) return "bg-yellow-500";
-    return "bg-green-500";
-  };
-
-  const getProgressTextColor = (pct: number) => {
-    if (pct >= 100) return "text-red-600";
-    if (pct >= 80) return "text-orange-600";
-    if (pct >= 60) return "text-yellow-600";
-    return "text-green-600";
-  };
-
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <PageLoader className="h-full" />;
   }
 
   return (
@@ -169,7 +153,7 @@ export default function BudgetsPage() {
             {/* Progress Bar */}
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span className={`font-medium ${getProgressTextColor(status.percentage)}`}>
+                <span className={`font-medium ${getBudgetTextColor(status.percentage)}`}>
                   {status.percentage}% used
                 </span>
                 <span className="text-muted-foreground">
@@ -178,7 +162,7 @@ export default function BudgetsPage() {
               </div>
               <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
                 <div
-                  className={`h-full rounded-full transition-all duration-500 ${getProgressColor(status.percentage)}`}
+                  className={`h-full rounded-full transition-all duration-500 ${getBudgetProgressColor(status.percentage)}`}
                   style={{ width: `${Math.min(status.percentage, 100)}%` }}
                 />
               </div>

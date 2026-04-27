@@ -7,16 +7,18 @@
 // =============================================================================
 
 import { useState, useEffect, useCallback } from "react";
-import { Loader2, Target, TrendingUp } from "lucide-react";
+import { Target, TrendingUp } from "lucide-react";
 import { getDashboardData, type DashboardData } from "@/actions/dashboard";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/utils";
+import { getBudgetProgressColor, getBudgetTextColor } from "@/lib/budget";
 import {
   StatsCards,
   SpendingChart,
   MonthlyTrendChart,
   RecentTransactions,
 } from "@/components/features/dashboard";
+import { PageLoader } from "@/components/shared";
 
 // =============================================================================
 // Main Component
@@ -44,11 +46,7 @@ export default function DashboardPage() {
   // Loading State
   // =============================================================================
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <PageLoader />;
   }
 
   // =============================================================================
@@ -82,22 +80,13 @@ export default function DashboardPage() {
               <Target className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm font-medium">Monthly Budget</span>
             </div>
-            <span className={`text-sm font-medium ${
-              data.budgetStatus.percentage >= 100 ? "text-red-600" :
-              data.budgetStatus.percentage >= 80 ? "text-orange-600" :
-              "text-green-600"
-            }`}>
+            <span className={`text-sm font-medium ${getBudgetTextColor(data.budgetStatus.percentage)}`}>
               {data.budgetStatus.percentage}%
             </span>
           </div>
           <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all duration-500 ${
-                data.budgetStatus.percentage >= 100 ? "bg-red-500" :
-                data.budgetStatus.percentage >= 80 ? "bg-orange-500" :
-                data.budgetStatus.percentage >= 60 ? "bg-yellow-500" :
-                "bg-green-500"
-              }`}
+              className={`h-full rounded-full transition-all duration-500 ${getBudgetProgressColor(data.budgetStatus.percentage)}`}
               style={{ width: `${Math.min(data.budgetStatus.percentage, 100)}%` }}
             />
           </div>

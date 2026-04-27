@@ -11,6 +11,8 @@ import { sql } from "@/db/neon";
 import { revalidatePath } from "next/cache";
 import { getAuthUser } from "@/actions/auth";
 import { extractErrorMessage } from "@/lib/utils";
+import { parseInvestmentStats } from "@/lib/investment";
+import { parseInvestmentFormData } from "@/lib/formData";
 import type { Investment, InvestmentStats } from "@/types";
 import { refreshInvestmentPrices } from "@/actions/refreshPrices";
 
@@ -59,15 +61,7 @@ export async function addInvestment(
       return { success: false, error: "You must be logged in" };
     }
 
-    const name = formData.get("name") as string;
-    const symbol = (formData.get("symbol") as string) || null;
-    const type = formData.get("type") as string;
-    const quantity = formData.get("quantity") as string;
-    const purchase_price = formData.get("purchase_price") as string;
-    const current_price = formData.get("current_price") as string;
-    const currency = (formData.get("currency") as string) || "INR";
-    const purchase_date = formData.get("purchase_date") as string;
-    const notes = (formData.get("notes") as string) || null;
+    const { name, symbol, type, quantity, purchase_price, current_price, currency, purchase_date, notes } = parseInvestmentFormData(formData);
 
     await sql`
       INSERT INTO investments
@@ -98,15 +92,7 @@ export async function updateInvestment(
       return { success: false, error: "You must be logged in" };
     }
 
-    const name = formData.get("name") as string;
-    const symbol = (formData.get("symbol") as string) || null;
-    const type = formData.get("type") as string;
-    const quantity = formData.get("quantity") as string;
-    const purchase_price = formData.get("purchase_price") as string;
-    const current_price = formData.get("current_price") as string;
-    const currency = (formData.get("currency") as string) || "INR";
-    const purchase_date = formData.get("purchase_date") as string;
-    const notes = (formData.get("notes") as string) || null;
+    const { name, symbol, type, quantity, purchase_price, current_price, currency, purchase_date, notes } = parseInvestmentFormData(formData);
 
     const result = await sql`
       UPDATE investments
@@ -172,19 +158,11 @@ export async function deleteInvestment(
 // =============================================================================
 // Get Investment Stats
 // =============================================================================
-const ZERO_STATS: InvestmentStats = {
-  totalInvested: 0,
-  currentValue: 0,
-  totalGainLoss: 0,
-  gainPercentage: 0,
-  holdingCount: 0,
-};
-
 export async function getInvestmentStats(): Promise<InvestmentStats> {
   try {
     const user = await getAuthUser();
     if (!user) {
-      return ZERO_STATS;
+      return parseInvestmentStats(undefined);
     }
 
     const result = await sql`
@@ -196,29 +174,10 @@ export async function getInvestmentStats(): Promise<InvestmentStats> {
       WHERE user_id = ${user.id}
     `;
 
-    const row = result[0];
-    const holdingCount = parseInt(row?.holding_count || "0", 10);
-    const totalInvested = parseFloat(row?.total_invested || "0");
-    const currentValue = parseFloat(row?.total_current || "0");
-
-    if (!row?.total_invested) {
-      return ZERO_STATS;
-    }
-
-    const totalGainLoss = currentValue - totalInvested;
-    const gainPercentage =
-      totalInvested > 0 ? Math.round((totalGainLoss / totalInvested) * 100) : 0;
-
-    return {
-      totalInvested,
-      currentValue,
-      totalGainLoss,
-      gainPercentage,
-      holdingCount,
-    };
+    return parseInvestmentStats(result[0]);
   } catch (error: unknown) {
     console.error("Get investment stats error:", error);
-    return ZERO_STATS;
+    return parseInvestmentStats(undefined);
   }
 }
 
@@ -260,7 +219,7 @@ export async function updateInvestmentPrices(
 // =============================================================================
 export async function getInvestmentPageData(): Promise<InvestmentPageData> {
   const user = await getAuthUser();
-  if (!user) return { investments: [], stats: ZERO_STATS };
+  if (!user) return { investments: [], stats: parseInvestmentStats(undefined) };
 
   await refreshInvestmentPrices();
 
@@ -281,18 +240,7 @@ export async function getInvestmentPageData(): Promise<InvestmentPageData> {
   ]);
 
   const investments = investmentRows as Investment[];
-
-  const row = statsRows[0];
-  const totalInvested = parseFloat(row?.total_invested || "0");
-  const currentValue = parseFloat(row?.total_current || "0");
-  const holdingCount = parseInt(row?.holding_count || "0", 10);
-
-  let stats = ZERO_STATS;
-  if (holdingCount > 0) {
-    const totalGainLoss = currentValue - totalInvested;
-    const gainPercentage = totalInvested > 0 ? Math.round((totalGainLoss / totalInvested) * 100) : 0;
-    stats = { totalInvested, currentValue, totalGainLoss, gainPercentage, holdingCount };
-  }
+  const stats = parseInvestmentStats(statsRows[0]);
 
   return { investments, stats };
 }

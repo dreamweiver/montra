@@ -11,6 +11,9 @@ import type { BudgetStatus } from "@/types/budget";
 import type { InvestmentStats } from "@/types";
 import { refreshInvestmentPrices } from "@/actions/refreshPrices";
 import { seedDefaultCategories } from "@/actions/categories";
+import { getMonthRange } from "@/lib/date";
+import { computeBudgetPercentage } from "@/lib/budget";
+import { parseInvestmentStats } from "@/lib/investment";
 
 export interface DashboardData {
   stats: DashboardStats;
@@ -47,13 +50,11 @@ export async function getDashboardData(): Promise<DashboardData> {
 
   const userId = user.id;
 
-  await Promise.all([seedDefaultCategories(), refreshInvestmentPrices()]);
+  const { start: startOfMonth, end: endOfMonth } = getMonthRange();
 
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
-
-  const [statsRows, spendingRows, trendRows, recentRows, budgetRows, budgetSpentRows, investmentRows] = await Promise.all([
+  const [, , statsRows, spendingRows, trendRows, recentRows, budgetRows, budgetSpentRows, investmentRows] = await Promise.all([
+    seedDefaultCategories(),
+    refreshInvestmentPrices(),
     sql`
       SELECT
         COALESCE(SUM(CASE WHEN type = 'income' THEN amount::numeric ELSE 0 END), 0) as total_income,
@@ -159,21 +160,13 @@ export async function getDashboardData(): Promise<DashboardData> {
     const budget = budgetRows[0];
     const limit = parseFloat(budget.monthly_limit);
     const spent = parseFloat(budgetSpentRows[0]?.total || "0");
-    const percentage = limit > 0 ? Math.round((spent / limit) * 100) : 0;
+    const percentage = computeBudgetPercentage(spent, limit);
     budgetStatus = { hasBudget: true, spent, limit, percentage, currency: budget.currency };
   }
 
   // Investment stats
-  let investmentStats: InvestmentStats | null = null;
-  const ir = investmentRows[0];
-  const holdingCount = parseInt(ir?.holding_count || "0", 10);
-  if (holdingCount > 0) {
-    const totalInvested = parseFloat(ir.total_invested || "0");
-    const currentValue = parseFloat(ir.total_current || "0");
-    const totalGainLoss = currentValue - totalInvested;
-    const gainPercentage = totalInvested > 0 ? Math.round((totalGainLoss / totalInvested) * 100) : 0;
-    investmentStats = { totalInvested, currentValue, totalGainLoss, gainPercentage, holdingCount };
-  }
+  const parsedStats = parseInvestmentStats(investmentRows[0]);
+  const investmentStats: InvestmentStats | null = parsedStats.holdingCount > 0 ? parsedStats : null;
 
   return { stats, spending, trend, recentTransactions, budgetStatus, investmentStats };
 }

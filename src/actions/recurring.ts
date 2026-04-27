@@ -9,22 +9,12 @@
 import { sql } from "@/db/neon";
 import { revalidatePath } from "next/cache";
 import { getAuthUser } from "@/actions/auth";
+import { toDateString } from "@/lib/date";
 import type { RecurringTransaction } from "@/types/recurring";
 
 export interface RecurringPageData {
   items: RecurringTransaction[];
   processed: number;
-}
-
-// ---------------------------------------------
-// Helper: Format date as YYYY-MM-DD (timezone-safe)
-// ---------------------------------------------
-function toDateString(date: Date | string): string {
-  const d = new Date(date);
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}T00:00:00.000Z`;
 }
 
 // =============================================================================

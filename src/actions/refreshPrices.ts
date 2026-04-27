@@ -21,20 +21,29 @@ interface QuoteResult {
   currency?: string;
 }
 
+const REFRESH_COOLDOWN_MS = 5 * 60 * 1000;
+
 export async function refreshInvestmentPrices(): Promise<{ updated: number }> {
   try {
     const user = await getAuthUser();
     if (!user) return { updated: 0 };
 
+    // Skip if prices were refreshed within the cooldown period
     const investments = await sql`
-      SELECT id, symbol, type, currency FROM investments
+      SELECT id, symbol, type, currency, updated_at FROM investments
       WHERE user_id = ${user.id}
         AND symbol IS NOT NULL
         AND symbol != ''
         AND type = ANY(${LIVE_FETCH_TYPES as unknown as string[]})
+      ORDER BY updated_at DESC
     `;
 
     if (investments.length === 0) return { updated: 0 };
+
+    const lastUpdate = new Date(investments[0].updated_at).getTime();
+    if (Date.now() - lastUpdate < REFRESH_COOLDOWN_MS) {
+      return { updated: 0 };
+    }
 
     // Fetch quotes in parallel
     const quotes = new Map<number, { price: number; quoteCurrency: string; targetCurrency: string }>();

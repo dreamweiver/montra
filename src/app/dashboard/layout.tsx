@@ -1,32 +1,22 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { getUserSettings } from "@/actions/settings";
+import { useIdleLogout } from "@/hooks/useIdleLogout";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { LogOut, Home, CreditCard, TrendingUp, Settings, Menu, FolderOpen, CalendarClock, Target, X, HelpCircle } from "lucide-react";
+import { LogOut, Menu, X } from "lucide-react";
 import { ThemeToggle, BudgetIndicator } from "@/components/shared";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { NAV_ITEMS } from "@/lib/config/navigation";
 
 // =============================================================================
 // Constants
 // =============================================================================
 const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
-const ACTIVITY_EVENTS = ["mousedown", "keydown", "touchstart", "scroll"] as const;
-
-const navItems = [
-  { icon: Home, label: "Dashboard", path: "/dashboard" },
-  { icon: CreditCard, label: "Transactions", path: "/dashboard/transactions" },
-  { icon: FolderOpen, label: "Categories", path: "/dashboard/categories" },
-  { icon: CalendarClock, label: "Recurring", path: "/dashboard/recurring" },
-  { icon: Target, label: "Budgets", path: "/dashboard/budgets" },
-  { icon: TrendingUp, label: "Investments", path: "/dashboard/investments" },
-  { icon: Settings, label: "Settings", path: "/dashboard/settings" },
-  { icon: HelpCircle, label: "Contact Us", path: "/dashboard/contact" },
-];
 
 // =============================================================================
 // Main Component
@@ -38,11 +28,9 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [isLoading, setIsLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
-  const idleTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // ---------------------------------------------------------------------------
   // Logout
@@ -56,48 +44,21 @@ export default function DashboardLayout({
   // ---------------------------------------------------------------------------
   // Idle Auto-Logout
   // ---------------------------------------------------------------------------
-  const resetIdleTimer = useCallback(() => {
-    if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-    idleTimerRef.current = setTimeout(() => {
-      toast.info("Session expired due to inactivity");
-      handleLogout();
-    }, IDLE_TIMEOUT_MS);
-  }, [handleLogout]);
-
-  useEffect(() => {
-    resetIdleTimer();
-
-    const handler = () => resetIdleTimer();
-    for (const event of ACTIVITY_EVENTS) {
-      window.addEventListener(event, handler, { passive: true });
-    }
-
-    return () => {
-      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
-      for (const event of ACTIVITY_EVENTS) {
-        window.removeEventListener(event, handler);
-      }
-    };
-  }, [resetIdleTimer]);
+  useIdleLogout(IDLE_TIMEOUT_MS, useCallback(() => {
+    toast.info("Session expired due to inactivity");
+    handleLogout();
+  }, [handleLogout]));
 
   // ---------------------------------------------------------------------------
-  // Auth Check & Load User Name
+  // Load User Name
   // ---------------------------------------------------------------------------
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        toast.error("Please login to continue");
-        router.push("/login");
-      } else {
-        setIsLoading(false);
-        getUserSettings().then((result) => {
-          if (result.success && result.data?.first_name) {
-            setUserName(result.data.first_name);
-          }
-        });
+    getUserSettings().then((result) => {
+      if (result.success && result.data?.first_name) {
+        setUserName(result.data.first_name);
       }
     });
-  }, [router]);
+  }, []);
 
   // ---------------------------------------------------------------------------
   // Menu Toggle
@@ -109,14 +70,6 @@ export default function DashboardLayout({
       setMobileMenuOpen(true);
     }
   }, []);
-
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-lg">Loading...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="flex h-screen bg-background">
@@ -130,7 +83,7 @@ export default function DashboardLayout({
           </div>
 
           <nav className="flex-1 p-4 space-y-2">
-            {navItems.map((item) => {
+            {NAV_ITEMS.map((item) => {
               const isActive = pathname === item.path;
               return (
                 <Link key={item.label} href={item.path}>
@@ -149,7 +102,7 @@ export default function DashboardLayout({
           <div className="p-4 border-t">
             <Button
               variant="ghost"
-              className="w-full justify-start text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+              className="w-full justify-start cursor-pointer bg-gradient-to-r from-rose-500/10 to-orange-500/10 text-rose-600 hover:from-rose-500 hover:to-orange-500 hover:text-white dark:from-rose-500/15 dark:to-orange-500/15 dark:text-rose-400 dark:hover:from-rose-500 dark:hover:to-orange-500 dark:hover:text-white transition-all duration-200"
               onClick={handleLogout}
             >
               <LogOut className="mr-3 h-5 w-5" />
@@ -172,7 +125,7 @@ export default function DashboardLayout({
             </div>
 
             <nav className="flex-1 p-4 space-y-2">
-              {navItems.map((item) => {
+              {NAV_ITEMS.map((item) => {
                 const isActive = pathname === item.path;
                 return (
                   <Link key={item.label} href={item.path} onClick={() => setMobileMenuOpen(false)}>
@@ -191,7 +144,7 @@ export default function DashboardLayout({
             <div className="p-4 border-t">
               <Button
                 variant="ghost"
-                className="w-full justify-start text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950"
+                className="w-full justify-start cursor-pointer bg-gradient-to-r from-rose-500/10 to-orange-500/10 text-rose-600 hover:from-rose-500 hover:to-orange-500 hover:text-white dark:from-rose-500/15 dark:to-orange-500/15 dark:text-rose-400 dark:hover:from-rose-500 dark:hover:to-orange-500 dark:hover:text-white transition-all duration-200"
                 onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
               >
                 <LogOut className="mr-3 h-5 w-5" />

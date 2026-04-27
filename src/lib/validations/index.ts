@@ -21,3 +21,8 @@ export {
   investmentSchema,
   type InvestmentFormData,
 } from "./investment";
+
+export {
+  registerSchema,
+  type RegisterFormData,
+} from "./register";

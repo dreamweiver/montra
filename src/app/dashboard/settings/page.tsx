@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { supabase } from "@/lib/supabase";
 import { getUserSettings, updateUserSettings } from "@/actions/settings";
 import { SUPPORTED_CURRENCIES, DATE_FORMAT_OPTIONS } from "@/lib/constants";
-import { UserSettings } from "@/types";
 import { toast } from "sonner";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,23 +15,31 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ThemeToggle, PageLoader } from "@/components/shared";
 import { Loader2, Mail, Save, KeyRound } from "lucide-react";
 import { useTheme } from "next-themes";
+import { settingsSchema, type SettingsFormData } from "@/lib/validations";
 
 export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [settings, setSettings] = useState<UserSettings | null>(null);
-
-  // Profile fields
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
-
-  // Preference fields
-  const [defaultCurrency, setDefaultCurrency] = useState("INR");
-  const [dateFormat, setDateFormat] = useState("dd/MM/yyyy");
 
   const { resolvedTheme } = useTheme();
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    formState: { errors, isDirty },
+  } = useForm<SettingsFormData>({
+    resolver: zodResolver(settingsSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      dateOfBirth: "",
+      defaultCurrency: "INR",
+      dateFormat: "dd/MM/yyyy",
+    },
+  });
 
   useEffect(() => {
     async function load() {
@@ -41,33 +50,32 @@ export default function SettingsPage() {
 
       const result = await getUserSettings();
       if (result.success && result.data) {
-        setSettings(result.data);
-        setFirstName(result.data.first_name || "");
-        setLastName(result.data.last_name || "");
-        setDateOfBirth(
-          result.data.date_of_birth
+        reset({
+          firstName: result.data.first_name || "",
+          lastName: result.data.last_name || "",
+          dateOfBirth: result.data.date_of_birth
             ? new Date(result.data.date_of_birth).toISOString().split("T")[0]
-            : ""
-        );
-        setDefaultCurrency(result.data.default_currency);
-        setDateFormat(result.data.date_format);
+            : "",
+          defaultCurrency: result.data.default_currency,
+          dateFormat: result.data.date_format,
+        });
       }
 
       setLoading(false);
     }
 
     load();
-  }, []);
+  }, [reset]);
 
-  const handleSave = async () => {
+  const onSubmit = async (data: SettingsFormData) => {
     setSaving(true);
     try {
       const formData = new FormData();
-      formData.append("first_name", firstName);
-      formData.append("last_name", lastName);
-      formData.append("date_of_birth", dateOfBirth);
-      formData.append("default_currency", defaultCurrency);
-      formData.append("date_format", dateFormat);
+      formData.append("first_name", data.firstName || "");
+      formData.append("last_name", data.lastName || "");
+      formData.append("date_of_birth", data.dateOfBirth || "");
+      formData.append("default_currency", data.defaultCurrency);
+      formData.append("date_format", data.dateFormat);
 
       const result = await updateUserSettings(formData);
 
@@ -76,19 +84,7 @@ export default function SettingsPage() {
         return;
       }
 
-      // Update local settings reference for change detection
-      setSettings((prev) =>
-        prev
-          ? {
-              ...prev,
-              first_name: firstName || null,
-              last_name: lastName || null,
-              date_of_birth: dateOfBirth || null,
-              default_currency: defaultCurrency,
-              date_format: dateFormat,
-            }
-          : prev
-      );
+      reset(data);
 
       toast.success("Settings saved");
     } catch {
@@ -112,17 +108,6 @@ export default function SettingsPage() {
     }
   };
 
-  const hasChanges =
-    settings &&
-    (firstName !== (settings.first_name || "") ||
-      lastName !== (settings.last_name || "") ||
-      dateOfBirth !==
-        (settings.date_of_birth
-          ? new Date(settings.date_of_birth).toISOString().split("T")[0]
-          : "") ||
-      defaultCurrency !== settings.default_currency ||
-      dateFormat !== settings.date_format);
-
   if (loading) {
     return <PageLoader className="h-full" />;
   }
@@ -134,45 +119,120 @@ export default function SettingsPage() {
         <p className="text-muted-foreground">Manage your account and preferences</p>
       </div>
 
-      {/* Profile */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Profile</CardTitle>
-          <CardDescription>Your personal information</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
-              <Input
-                id="firstName"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                placeholder="John"
-              />
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Profile */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Profile</CardTitle>
+            <CardDescription>Your personal information</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name</Label>
+                <Input
+                  id="firstName"
+                  placeholder="John"
+                  {...register("firstName")}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input
+                  id="lastName"
+                  placeholder="Doe"
+                  {...register("lastName")}
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
-              <Input
-                id="lastName"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                placeholder="Doe"
-              />
-            </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="dob">Date of Birth</Label>
-            <Input
-              id="dob"
-              type="date"
-              value={dateOfBirth}
-              onChange={(e) => setDateOfBirth(e.target.value)}
-            />
-          </div>
-        </CardContent>
-      </Card>
+            <div className="space-y-2">
+              <Label htmlFor="dob">Date of Birth</Label>
+              <Input
+                id="dob"
+                type="date"
+                {...register("dateOfBirth")}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Preferences */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Preferences</CardTitle>
+            <CardDescription>Customize your default settings for transactions</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="currency">Default Currency</Label>
+                <Controller
+                  name="defaultCurrency"
+                  control={control}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger id="currency">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SUPPORTED_CURRENCIES.map((c) => (
+                          <SelectItem key={c.code} value={c.code}>
+                            {c.symbol} {c.name} ({c.code})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.defaultCurrency && (
+                  <p className="text-sm text-red-500">{errors.defaultCurrency.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="date-format">Date Format</Label>
+                <Controller
+                  name="dateFormat"
+                  control={control}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger id="date-format">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {DATE_FORMAT_OPTIONS.map((f) => (
+                          <SelectItem key={f.value} value={f.value}>
+                            {f.label} ({f.example})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.dateFormat && (
+                  <p className="text-sm text-red-500">{errors.dateFormat.message}</p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Save Button */}
+        <div>
+          <Button
+            type="submit"
+            disabled={saving || !isDirty}
+          >
+            {saving ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="mr-2 h-4 w-4" />
+            )}
+            Save Changes
+          </Button>
+        </div>
+      </form>
 
       {/* Account */}
       <Card>
@@ -200,64 +260,6 @@ export default function SettingsPage() {
           </div>
         </CardContent>
       </Card>
-
-      {/* Preferences */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Preferences</CardTitle>
-          <CardDescription>Customize your default settings for transactions</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="currency">Default Currency</Label>
-              <Select value={defaultCurrency} onValueChange={setDefaultCurrency}>
-                <SelectTrigger id="currency">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {SUPPORTED_CURRENCIES.map((c) => (
-                    <SelectItem key={c.code} value={c.code}>
-                      {c.symbol} {c.name} ({c.code})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="date-format">Date Format</Label>
-              <Select value={dateFormat} onValueChange={setDateFormat}>
-                <SelectTrigger id="date-format">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {DATE_FORMAT_OPTIONS.map((f) => (
-                    <SelectItem key={f.value} value={f.value}>
-                      {f.label} ({f.example})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Save Button */}
-      <div>
-        <Button
-          onClick={handleSave}
-          disabled={saving || !hasChanges}
-        >
-          {saving ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Save className="mr-2 h-4 w-4" />
-          )}
-          Save Changes
-        </Button>
-      </div>
 
       {/* Display / Theme */}
       <Card>

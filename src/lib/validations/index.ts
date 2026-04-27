@@ -36,3 +36,8 @@ export {
   budgetSchema,
   type BudgetFormData,
 } from "./budget";
+
+export {
+  settingsSchema,
+  type SettingsFormData,
+} from "./settings";

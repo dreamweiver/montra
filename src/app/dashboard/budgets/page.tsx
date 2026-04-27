@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { getBudgetPageData, upsertBudget, checkBudgetStatus } from "@/actions/budgets";
 import { SUPPORTED_CURRENCIES } from "@/lib/constants";
 import { formatCurrency } from "@/lib/utils";
@@ -14,28 +16,35 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, Save, Target } from "lucide-react";
 import type { BudgetStatus } from "@/types";
 import { PageLoader } from "@/components/shared";
+import { budgetSchema, type BudgetFormData } from "@/lib/validations";
 
 export default function BudgetsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [monthlyLimit, setMonthlyLimit] = useState("");
-  const [currency, setCurrency] = useState("INR");
-  const [savedLimit, setSavedLimit] = useState("");
-  const [savedCurrency, setSavedCurrency] = useState("INR");
   const [status, setStatus] = useState<BudgetStatus | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    formState: { errors, isDirty },
+  } = useForm<BudgetFormData>({
+    resolver: zodResolver(budgetSchema),
+    defaultValues: {
+      monthlyLimit: "",
+      currency: "INR",
+    },
+  });
 
   useEffect(() => {
     async function load() {
       const { budget, status: budgetStatus, defaultCurrency } = await getBudgetPageData();
 
       if (budget) {
-        setMonthlyLimit(budget.monthly_limit);
-        setCurrency(budget.currency);
-        setSavedLimit(budget.monthly_limit);
-        setSavedCurrency(budget.currency);
+        reset({ monthlyLimit: budget.monthly_limit, currency: budget.currency });
       } else {
-        setCurrency(defaultCurrency);
-        setSavedCurrency(defaultCurrency);
+        reset({ monthlyLimit: "", currency: defaultCurrency });
       }
 
       if (budgetStatus.hasBudget) {
@@ -46,14 +55,14 @@ export default function BudgetsPage() {
     }
 
     load();
-  }, []);
+  }, [reset]);
 
-  const handleSave = async () => {
+  const onSubmit = async (data: BudgetFormData) => {
     setSaving(true);
     try {
       const formData = new FormData();
-      formData.append("monthly_limit", monthlyLimit);
-      formData.append("currency", currency);
+      formData.append("monthly_limit", data.monthlyLimit);
+      formData.append("currency", data.currency);
 
       const result = await upsertBudget(formData);
 
@@ -62,11 +71,9 @@ export default function BudgetsPage() {
         return;
       }
 
-      setSavedLimit(monthlyLimit);
-      setSavedCurrency(currency);
+      reset(data);
       toast.success("Budget saved");
 
-      // Refresh status
       const statusResult = await checkBudgetStatus();
       if (statusResult.success && statusResult.data) {
         setStatus(statusResult.data);
@@ -77,8 +84,6 @@ export default function BudgetsPage() {
       setSaving(false);
     }
   };
-
-  const hasChanges = monthlyLimit !== savedLimit || currency !== savedCurrency;
 
   if (loading) {
     return <PageLoader className="h-full" />;
@@ -91,52 +96,65 @@ export default function BudgetsPage() {
         <p className="text-muted-foreground">Set a monthly spending limit and track your progress</p>
       </div>
 
-      {/* Set Budget */}
       <Card>
         <CardHeader>
           <CardTitle>Monthly Budget</CardTitle>
           <CardDescription>Set your overall monthly spending limit</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="budget-amount">Amount</Label>
-              <Input
-                id="budget-amount"
-                type="number"
-                step="0.01"
-                placeholder="e.g., 50000"
-                value={monthlyLimit}
-                onChange={(e) => setMonthlyLimit(e.target.value)}
-              />
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="budget-amount">Amount</Label>
+                <Input
+                  id="budget-amount"
+                  type="number"
+                  step="0.01"
+                  placeholder="e.g., 50000"
+                  {...register("monthlyLimit")}
+                  className={errors.monthlyLimit ? "border-red-500 focus-visible:ring-red-500" : ""}
+                />
+                {errors.monthlyLimit && (
+                  <p className="text-sm text-red-500">{errors.monthlyLimit.message}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="budget-currency">Currency</Label>
+                <Controller
+                  name="currency"
+                  control={control}
+                  render={({ field }) => (
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger id="budget-currency">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {SUPPORTED_CURRENCIES.map((c) => (
+                          <SelectItem key={c.code} value={c.code}>
+                            {c.symbol} {c.name} ({c.code})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.currency && (
+                  <p className="text-sm text-red-500">{errors.currency.message}</p>
+                )}
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="budget-currency">Currency</Label>
-              <Select value={currency} onValueChange={setCurrency}>
-                <SelectTrigger id="budget-currency">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {SUPPORTED_CURRENCIES.map((c) => (
-                    <SelectItem key={c.code} value={c.code}>
-                      {c.symbol} {c.name} ({c.code})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <Button
-            onClick={handleSave}
-            disabled={saving || !monthlyLimit || parseFloat(monthlyLimit) <= 0 || !hasChanges}
-          >
-            {saving ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Save className="mr-2 h-4 w-4" />
-            )}
-            Save Budget
-          </Button>
+            <Button
+              type="submit"
+              disabled={saving || !isDirty}
+            >
+              {saving ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="mr-2 h-4 w-4" />
+              )}
+              Save Budget
+            </Button>
+          </form>
         </CardContent>
       </Card>
 

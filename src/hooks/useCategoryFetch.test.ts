@@ -48,8 +48,8 @@ describe("useCategoryFetch", () => {
       .mockResolvedValueOnce(incomeCategories);
 
     const { result, rerender } = renderHook(
-      ({ type }) => useCategoryFetch(type),
-      { initialProps: { type: "expense" } }
+      ({ type }: { type: "income" | "expense" }) => useCategoryFetch(type),
+      { initialProps: { type: "expense" as "income" | "expense" } }
     );
 
     await waitFor(() => {

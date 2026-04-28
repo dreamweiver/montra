@@ -83,7 +83,7 @@ export default function RegisterPage() {
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" autoComplete="off">
             {/* Name Fields */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
@@ -140,6 +140,7 @@ export default function RegisterPage() {
                 id="email"
                 type="email"
                 placeholder="name@example.com"
+                autoComplete="new-email"
                 {...register("email")}
                 className={errors.email ? "border-red-500 focus-visible:ring-red-500" : ""}
               />
@@ -154,6 +155,7 @@ export default function RegisterPage() {
               <Input
                 id="password"
                 type="password"
+                autoComplete="new-password"
                 {...register("password")}
                 className={errors.password ? "border-red-500 focus-visible:ring-red-500" : ""}
               />

@@ -13,7 +13,7 @@ vi.mock("@/db/neon", () => ({ sql: mockSql }));
 vi.mock("next/cache", () => ({ revalidatePath: mockRevalidatePath }));
 vi.mock("@/actions/auth", () => ({ getAuthUser: mockGetAuthUser }));
 
-import { getBudget, upsertBudget, checkBudgetStatus } from "@/actions/budgets";
+import { getBudget, upsertBudget, checkBudgetStatus, getBudgetPageData } from "@/actions/budgets";
 
 // =============================================================================
 // Tests
@@ -165,6 +165,54 @@ describe("Budget Server Actions", () => {
       const result = await checkBudgetStatus();
       expect(result.success).toBe(false);
       expect(result.error).toBe("Query failed");
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // getBudgetPageData
+  // ---------------------------------------------------------------------------
+  describe("getBudgetPageData", () => {
+    it("should return empty data if not authenticated", async () => {
+      mockGetAuthUser.mockResolvedValueOnce(null);
+      const result = await getBudgetPageData();
+      expect(result.budget).toBeNull();
+      expect(result.status.hasBudget).toBe(false);
+      expect(result.defaultCurrency).toBe("INR");
+    });
+
+    it("should return budget with status when budget exists", async () => {
+      mockSql
+        .mockResolvedValueOnce([{ id: 1, monthly_limit: "50000", currency: "INR" }])
+        .mockResolvedValueOnce([{ total: "20000" }])
+        .mockResolvedValueOnce([{ default_currency: "INR" }]);
+
+      const result = await getBudgetPageData();
+      expect(result.budget).not.toBeNull();
+      expect(result.status.hasBudget).toBe(true);
+      expect(result.status.limit).toBe(50000);
+      expect(result.status.spent).toBe(20000);
+      expect(result.status.percentage).toBe(40);
+    });
+
+    it("should return default currency from settings when no budget", async () => {
+      mockSql
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ total: "0" }])
+        .mockResolvedValueOnce([{ default_currency: "USD" }]);
+
+      const result = await getBudgetPageData();
+      expect(result.budget).toBeNull();
+      expect(result.defaultCurrency).toBe("USD");
+    });
+
+    it("should default to INR when no settings exist", async () => {
+      mockSql
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ total: "0" }])
+        .mockResolvedValueOnce([]);
+
+      const result = await getBudgetPageData();
+      expect(result.defaultCurrency).toBe("INR");
     });
   });
 });

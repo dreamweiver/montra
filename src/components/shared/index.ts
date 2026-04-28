@@ -12,3 +12,4 @@ export { default as ThemeToggle } from "./ThemeToggle";
 export { default as CurrencySelector } from "./CurrencySelector";
 export { default as BudgetIndicator } from "./BudgetIndicator";
 export { default as SymbolSearch } from "./SymbolSearch";
+export { default as PageLoader } from "./PageLoader";

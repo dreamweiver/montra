@@ -11,6 +11,7 @@ import { sql } from "@/db/neon";
 import { revalidatePath } from "next/cache";
 import { getAuthUser } from "@/actions/auth";
 import { extractErrorMessage } from "@/lib/utils";
+import { parseTransactionFormData } from "@/lib/formData";
 import { refreshInvestmentPrices } from "@/actions/refreshPrices";
 
 // =============================================================================
@@ -24,12 +25,7 @@ export async function addTransaction(formData: FormData) {
       return { success: false, error: "You must be logged in" };
     }
 
-    const amount = formData.get("amount") as string;
-    const type = formData.get("type") as "income" | "expense";
-    const description = formData.get("description") as string;
-    const category = formData.get("category") as string;
-    const currency = (formData.get("currency") as string) || "INR";
-    const transaction_date = formData.get("transaction_date") as string;
+    const { amount, type, description, category, currency, transaction_date } = parseTransactionFormData(formData);
 
     await sql`
       INSERT INTO transactions 
@@ -137,12 +133,7 @@ export async function updateTransaction(id: number, formData: FormData) {
       return { success: false, error: "You must be logged in" };
     }
 
-    const amount = formData.get("amount") as string;
-    const type = formData.get("type") as "income" | "expense";
-    const description = formData.get("description") as string;
-    const category = formData.get("category") as string;
-    const currency = (formData.get("currency") as string) || "INR";
-    const transaction_date = formData.get("transaction_date") as string;
+    const { amount, type, description, category, currency, transaction_date } = parseTransactionFormData(formData);
 
     // Update only if transaction belongs to user (security check)
     const result = await sql`

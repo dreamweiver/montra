@@ -23,11 +23,11 @@ import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
 import { updateTransaction } from "@/actions/transactions";
-import { getCategories } from "@/actions/categories";
 import { transactionSchema, type TransactionFormData } from "@/lib/validations";
 import { TRANSACTION_CATEGORIES, SUPPORTED_CURRENCIES } from "@/lib/constants";
 import { LoadingOverlay, CurrencySelector } from "@/components/shared";
-import type { Transaction, Category } from "@/types";
+import { useCategoryFetch } from "@/hooks/useCategoryFetch";
+import type { Transaction } from "@/types";
 import { extractErrorMessage } from "@/lib/utils";
 
 // =============================================================================
@@ -54,7 +54,6 @@ export default function EditTransactionSheet({
   onSuccess,
 }: EditTransactionSheetProps) {
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
 
   // ---------------------------------------------
   // React Hook Form Setup
@@ -85,13 +84,7 @@ export default function EditTransactionSheet({
   const transactionDate = watch("transaction_date");
 
   // Fetch categories when type changes
-  useEffect(() => {
-    const fetchCategories = async () => {
-      const data = await getCategories(type);
-      setCategories(data);
-    };
-    fetchCategories();
-  }, [type]);
+  const categories = useCategoryFetch(type);
 
   // ---------------------------------------------
   // Populate Form When Transaction Changes

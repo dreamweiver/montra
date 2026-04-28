@@ -8,7 +8,7 @@
 // =============================================================================
 
 import { useState, useEffect, useCallback } from "react";
-import { Loader2, RefreshCw, Pencil, Trash2, TrendingUp } from "lucide-react";
+import { RefreshCw, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,35 +27,13 @@ import {
   InvestmentStatsCards,
   AddInvestmentSheet,
   EditInvestmentSheet,
+  InvestmentTable,
+  InvestmentCardList,
 } from "@/components/features/investments";
-import { ConfirmDialog, EmptyState } from "@/components/shared";
-import { formatCurrency } from "@/lib/utils";
+import { ConfirmDialog, EmptyState, PageLoader } from "@/components/shared";
 import { INVESTMENT_TYPES, LIVE_FETCH_TYPES } from "@/lib/constants";
+import { computeGains, getTypeLabel } from "@/lib/investment";
 import type { Investment, InvestmentStats, InvestmentWithGains } from "@/types";
-
-// =============================================================================
-// Helpers
-// =============================================================================
-
-function computeGains(investment: Investment): InvestmentWithGains {
-  const qty = parseFloat(investment.quantity);
-  const purchasePrice = parseFloat(investment.purchase_price);
-  const currentPrice = parseFloat(investment.current_price);
-
-  const invested_amount = qty * purchasePrice;
-  const current_value = qty * currentPrice;
-  const gain_loss = current_value - invested_amount;
-  const gain_percentage =
-    invested_amount > 0
-      ? Math.round((gain_loss / invested_amount) * 10000) / 100
-      : 0;
-
-  return { ...investment, invested_amount, current_value, gain_loss, gain_percentage };
-}
-
-function getTypeLabel(value: string): string {
-  return INVESTMENT_TYPES.find((t) => t.value === value)?.label ?? value;
-}
 
 // =============================================================================
 // Zero Stats
@@ -172,11 +150,7 @@ export default function InvestmentsPage() {
   // Loading State
   // =============================================================================
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <PageLoader />;
   }
 
   // =============================================================================
@@ -248,162 +222,18 @@ export default function InvestmentsPage() {
       ) : (
         <>
           {/* Desktop Table */}
-          <div className="hidden md:block rounded-lg border overflow-hidden">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/50">
-                <tr>
-                  <th className="text-left px-4 py-3 font-medium">Name</th>
-                  <th className="text-left px-4 py-3 font-medium">Type</th>
-                  <th className="text-right px-4 py-3 font-medium">Qty</th>
-                  <th className="text-right px-4 py-3 font-medium">Buy Price</th>
-                  <th className="text-right px-4 py-3 font-medium">Current Price</th>
-                  <th className="text-right px-4 py-3 font-medium">Invested</th>
-                  <th className="text-right px-4 py-3 font-medium">Current Value</th>
-                  <th className="text-right px-4 py-3 font-medium">Gain/Loss</th>
-                  <th className="text-right px-4 py-3 font-medium">Gain %</th>
-                  <th className="text-right px-4 py-3 font-medium">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y">
-                {filteredInvestments.map((inv) => {
-                  const isPositive = inv.gain_loss >= 0;
-                  const gainClass = isPositive ? "text-green-600" : "text-red-600";
-
-                  return (
-                    <tr key={inv.id} className="hover:bg-muted/30 transition-colors">
-                      <td className="px-4 py-3">
-                        <div className="font-medium">{inv.name}</div>
-                        {inv.symbol && (
-                          <div className="text-xs text-muted-foreground">{inv.symbol}</div>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium">
-                          {getTypeLabel(inv.type)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-right">{parseFloat(inv.quantity)}</td>
-                      <td className="px-4 py-3 text-right">
-                        {formatCurrency(parseFloat(inv.purchase_price), inv.currency)}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        {formatCurrency(parseFloat(inv.current_price), inv.currency)}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        {formatCurrency(inv.invested_amount, inv.currency)}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        {formatCurrency(inv.current_value, inv.currency)}
-                      </td>
-                      <td className={`px-4 py-3 text-right font-medium ${gainClass}`}>
-                        {isPositive ? "+" : ""}
-                        {formatCurrency(inv.gain_loss, inv.currency)}
-                      </td>
-                      <td className={`px-4 py-3 text-right font-medium ${gainClass}`}>
-                        {isPositive ? "+" : ""}
-                        {inv.gain_percentage.toFixed(2)}%
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => handleEdit(inv)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-destructive hover:text-destructive"
-                            onClick={() => setDeleteId(inv.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <InvestmentTable
+            investments={filteredInvestments}
+            onEdit={handleEdit}
+            onDelete={(id) => setDeleteId(id)}
+          />
 
           {/* Mobile Cards */}
-          <div className="md:hidden space-y-3">
-            {filteredInvestments.map((inv) => {
-              const isPositive = inv.gain_loss >= 0;
-              const gainClass = isPositive ? "text-green-600" : "text-red-600";
-
-              return (
-                <div key={inv.id} className="rounded-lg border bg-card p-4 space-y-3">
-                  {/* Card Header */}
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div className="font-medium">{inv.name}</div>
-                      {inv.symbol && (
-                        <div className="text-xs text-muted-foreground">{inv.symbol}</div>
-                      )}
-                    </div>
-                    <span className="inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium">
-                      {getTypeLabel(inv.type)}
-                    </span>
-                  </div>
-
-                  {/* Metrics Grid */}
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div>
-                      <p className="text-muted-foreground text-xs">Invested</p>
-                      <p className="font-medium">
-                        {formatCurrency(inv.invested_amount, inv.currency)}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground text-xs">Current Value</p>
-                      <p className="font-medium">
-                        {formatCurrency(inv.current_value, inv.currency)}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground text-xs">Gain/Loss</p>
-                      <p className={`font-medium ${gainClass}`}>
-                        {isPositive ? "+" : ""}
-                        {formatCurrency(inv.gain_loss, inv.currency)} ({isPositive ? "+" : ""}
-                        {inv.gain_percentage.toFixed(2)}%)
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground text-xs">Qty</p>
-                      <p className="font-medium">{parseFloat(inv.quantity)}</p>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center justify-end gap-2 pt-1 border-t">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8"
-                      onClick={() => handleEdit(inv)}
-                    >
-                      <Pencil className="h-3.5 w-3.5 mr-1" />
-                      Edit
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 text-destructive hover:text-destructive"
-                      onClick={() => setDeleteId(inv.id)}
-                    >
-                      <Trash2 className="h-3.5 w-3.5 mr-1" />
-                      Delete
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <InvestmentCardList
+            investments={filteredInvestments}
+            onEdit={handleEdit}
+            onDelete={(id) => setDeleteId(id)}
+          />
         </>
       )}
 

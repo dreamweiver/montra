@@ -11,6 +11,8 @@ import { sql } from "@/db/neon";
 import { revalidatePath } from "next/cache";
 import { getAuthUser } from "@/actions/auth";
 import { extractErrorMessage } from "@/lib/utils";
+import { getMonthRange } from "@/lib/date";
+import { computeBudgetPercentage } from "@/lib/budget";
 import type { Budget, BudgetStatus } from "@/types/budget";
 
 export interface BudgetPageData {
@@ -111,9 +113,7 @@ export async function checkBudgetStatus(): Promise<{ success: boolean; data?: Bu
     const limit = parseFloat(budget.monthly_limit);
 
     // Get current month's total expenses
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+    const { start: startOfMonth, end: endOfMonth } = getMonthRange();
 
     const spentResult = await sql`
       SELECT COALESCE(SUM(amount::numeric), 0) as total
@@ -125,7 +125,7 @@ export async function checkBudgetStatus(): Promise<{ success: boolean; data?: Bu
     `;
 
     const spent = parseFloat(spentResult[0]?.total || "0");
-    const percentage = limit > 0 ? Math.round((spent / limit) * 100) : 0;
+    const percentage = computeBudgetPercentage(spent, limit);
 
     return {
       success: true,
@@ -157,9 +157,7 @@ export async function getBudgetPageData(): Promise<BudgetPageData> {
 
   if (!user) return empty;
 
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+  const { start: startOfMonth, end: endOfMonth } = getMonthRange();
 
   const [budgetRows, spentRows, settingsRows] = await Promise.all([
     sql`SELECT * FROM budgets WHERE user_id = ${user.id} LIMIT 1`,
@@ -183,7 +181,7 @@ export async function getBudgetPageData(): Promise<BudgetPageData> {
 
   const limit = parseFloat(budget.monthly_limit);
   const spent = parseFloat(spentRows[0]?.total || "0");
-  const percentage = limit > 0 ? Math.round((spent / limit) * 100) : 0;
+  const percentage = computeBudgetPercentage(spent, limit);
 
   return {
     budget,

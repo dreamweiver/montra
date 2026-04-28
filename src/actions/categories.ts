@@ -210,21 +210,21 @@ export async function seedDefaultCategories() {
       { name: "Others", icon: "📦", color: "#6b7280" },
     ];
 
-    // Insert expense categories
-    for (const cat of expenseCategories) {
-      await sql`
-        INSERT INTO categories (user_id, name, type, icon, color)
-        VALUES (${user.id}, ${cat.name}, 'expense', ${cat.icon}, ${cat.color})
-      `;
-    }
-
-    // Insert income categories
-    for (const cat of incomeCategories) {
-      await sql`
-        INSERT INTO categories (user_id, name, type, icon, color)
-        VALUES (${user.id}, ${cat.name}, 'income', ${cat.icon}, ${cat.color})
-      `;
-    }
+    // Insert all categories in parallel
+    await Promise.all([
+      ...expenseCategories.map((cat) =>
+        sql`
+          INSERT INTO categories (user_id, name, type, icon, color)
+          VALUES (${user.id}, ${cat.name}, 'expense', ${cat.icon}, ${cat.color})
+        `
+      ),
+      ...incomeCategories.map((cat) =>
+        sql`
+          INSERT INTO categories (user_id, name, type, icon, color)
+          VALUES (${user.id}, ${cat.name}, 'income', ${cat.icon}, ${cat.color})
+        `
+      ),
+    ]);
 
     revalidatePath("/dashboard/categories");
     revalidatePath("/dashboard/transactions");

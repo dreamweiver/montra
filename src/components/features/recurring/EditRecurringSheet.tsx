@@ -21,11 +21,11 @@ import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
 import { updateRecurringTransaction } from "@/actions/recurring";
-import { getCategories } from "@/actions/categories";
 import { recurringTransactionSchema, type RecurringTransactionFormData } from "@/lib/validations";
 import { LoadingOverlay, CurrencySelector } from "@/components/shared";
+import { useCategoryFetch } from "@/hooks/useCategoryFetch";
 import { FREQUENCY_OPTIONS, SUPPORTED_CURRENCIES, TRANSACTION_CATEGORIES } from "@/lib/constants";
-import type { Category, RecurringTransaction } from "@/types";
+import type { RecurringTransaction } from "@/types";
 
 // =============================================================================
 // Props
@@ -47,8 +47,6 @@ export default function EditRecurringSheet({
   onSuccess,
 }: EditRecurringSheetProps) {
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
-
   const {
     register,
     control,
@@ -90,13 +88,7 @@ export default function EditRecurringSheet({
   }, [recurring, setValue]);
 
   // Fetch categories when type changes
-  useEffect(() => {
-    const fetchCategories = async () => {
-      const data = await getCategories(type);
-      setCategories(data);
-    };
-    fetchCategories();
-  }, [type]);
+  const categories = useCategoryFetch(type);
 
   const onSubmit = async (data: RecurringTransactionFormData) => {
     if (!recurring) return;

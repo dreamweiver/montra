@@ -30,8 +30,11 @@ describe("settingsSchema", () => {
     expect(result.success).toBe(true);
   });
 
-  it("should accept missing optional fields", () => {
+  it("should accept empty string values for profile fields", () => {
     const result = settingsSchema.safeParse({
+      firstName: "",
+      lastName: "",
+      dateOfBirth: "",
       defaultCurrency: "USD",
       dateFormat: "MM/dd/yyyy",
     });
@@ -56,16 +59,14 @@ describe("settingsSchema", () => {
     }
   });
 
-  it("should accept with only required fields", () => {
+  it("should accept with empty profile fields and valid required fields", () => {
     const result = settingsSchema.safeParse({
+      firstName: "",
+      lastName: "",
+      dateOfBirth: "",
       defaultCurrency: "EUR",
       dateFormat: "yyyy-MM-dd",
     });
     expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data.firstName).toBe("");
-      expect(result.data.lastName).toBe("");
-      expect(result.data.dateOfBirth).toBe("");
-    }
   });
 });

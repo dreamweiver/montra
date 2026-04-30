@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -10,54 +12,33 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { supabase } from "@/lib/supabase";
 import { createUserProfile } from "@/actions/settings";
 import { toast } from "sonner";
+import { registerSchema, type RegisterFormData } from "@/lib/validations";
 
-// =============================================================================
-// Helpers
-// =============================================================================
-function calculateAge(dob: Date): number {
-  const today = new Date();
-  let age = today.getFullYear() - dob.getFullYear();
-  const monthDiff = today.getMonth() - dob.getMonth();
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
-    age--;
-  }
-  return age;
-}
-
-// =============================================================================
-// Main Component
-// =============================================================================
 export default function RegisterPage() {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      dateOfBirth: "",
+      email: "",
+      password: "",
+    },
+  });
 
-    // Age validation
-    if (!dateOfBirth) {
-      toast.error("Date of birth is required");
-      return;
-    }
-
-    const dob = new Date(dateOfBirth);
-    const age = calculateAge(dob);
-
-    if (age < 18) {
-      toast.error("You must be at least 18 years old to use Montra");
-      return;
-    }
-
+  const onSubmit = async (data: RegisterFormData) => {
     setLoading(true);
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
+    const { data: authData, error } = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
       options: {
         emailRedirectTo: `${window.location.origin}/dashboard`,
       },
@@ -69,13 +50,12 @@ export default function RegisterPage() {
       return;
     }
 
-    // Save profile data
-    if (data.user?.id) {
+    if (authData.user?.id) {
       await createUserProfile({
-        userId: data.user.id,
-        firstName: firstName.trim(),
-        lastName: lastName.trim(),
-        dateOfBirth,
+        userId: authData.user.id,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        dateOfBirth: data.dateOfBirth,
       });
     }
 
@@ -100,7 +80,7 @@ export default function RegisterPage() {
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleRegister} className="space-y-4" autoComplete="off">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" autoComplete="off">
             {/* Name Fields */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
@@ -109,11 +89,13 @@ export default function RegisterPage() {
                   id="firstName"
                   type="text"
                   placeholder="John"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
                   autoComplete="off"
-                  required
+                  {...register("firstName")}
+                  className={errors.firstName ? "border-red-500 focus-visible:ring-red-500" : ""}
                 />
+                {errors.firstName && (
+                  <p className="text-sm text-red-500">{errors.firstName.message}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="lastName">Last Name</Label>
@@ -121,11 +103,13 @@ export default function RegisterPage() {
                   id="lastName"
                   type="text"
                   placeholder="Doe"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
                   autoComplete="off"
-                  required
+                  {...register("lastName")}
+                  className={errors.lastName ? "border-red-500 focus-visible:ring-red-500" : ""}
                 />
+                {errors.lastName && (
+                  <p className="text-sm text-red-500">{errors.lastName.message}</p>
+                )}
               </div>
             </div>
 
@@ -135,14 +119,17 @@ export default function RegisterPage() {
               <Input
                 id="dob"
                 type="date"
-                value={dateOfBirth}
-                onChange={(e) => setDateOfBirth(e.target.value)}
                 max={maxDobStr}
-                required
+                {...register("dateOfBirth")}
+                className={errors.dateOfBirth ? "border-red-500 focus-visible:ring-red-500" : ""}
               />
-              <p className="text-xs text-muted-foreground">
-                You must be at least 18 years old
-              </p>
+              {errors.dateOfBirth ? (
+                <p className="text-sm text-red-500">{errors.dateOfBirth.message}</p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  You must be at least 18 years old
+                </p>
+              )}
             </div>
 
             {/* Email */}
@@ -152,11 +139,13 @@ export default function RegisterPage() {
                 id="email"
                 type="email"
                 placeholder="name@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
                 autoComplete="new-email"
-                required
+                {...register("email")}
+                className={errors.email ? "border-red-500 focus-visible:ring-red-500" : ""}
               />
+              {errors.email && (
+                <p className="text-sm text-red-500">{errors.email.message}</p>
+              )}
             </div>
 
             {/* Password */}
@@ -165,14 +154,17 @@ export default function RegisterPage() {
               <Input
                 id="password"
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
                 autoComplete="new-password"
-                required
+                {...register("password")}
+                className={errors.password ? "border-red-500 focus-visible:ring-red-500" : ""}
               />
-              <p className="text-xs text-muted-foreground">
-                Minimum 6 characters
-              </p>
+              {errors.password ? (
+                <p className="text-sm text-red-500">{errors.password.message}</p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Minimum 6 characters
+                </p>
+              )}
             </div>
 
             <Button type="submit" className="w-full" disabled={loading}>

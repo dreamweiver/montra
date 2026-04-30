@@ -28,6 +28,7 @@ import {
   deleteRecurringTransaction,
   toggleRecurringTransaction,
   processDueRecurringTransactions,
+  getRecurringPageData,
 } from "@/actions/recurring";
 
 // =============================================================================
@@ -218,6 +219,56 @@ describe("Recurring Transaction Server Actions", () => {
       mockSql.mockRejectedValueOnce(new Error("Query failed"));
       const result = await processDueRecurringTransactions();
       expect(result).toEqual({ success: false, processed: 0 });
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // getRecurringPageData
+  // ---------------------------------------------------------------------------
+  describe("getRecurringPageData", () => {
+    it("should return empty data if not authenticated", async () => {
+      mockGetAuthUser.mockResolvedValueOnce(null);
+      const result = await getRecurringPageData();
+      expect(result).toEqual({ items: [], processed: 0 });
+    });
+
+    it("should return items with zero processed when none due", async () => {
+      const allItems = [{ id: 1, amount: "500", frequency: "monthly", is_active: true }];
+      mockSql
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce(allItems);
+
+      const result = await getRecurringPageData();
+      expect(result.items).toEqual(allItems);
+      expect(result.processed).toBe(0);
+    });
+
+    it("should process due items and return updated list", async () => {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = yesterday.toISOString().split("T")[0];
+
+      const dueItems = [{
+        id: 1, amount: "500", type: "expense", description: "Rent",
+        category: "Housing", currency: "INR", frequency: "monthly",
+        next_date: yesterdayStr, end_date: null, is_active: true,
+      }];
+      const allItems = [...dueItems];
+      const updatedItems = [{ ...dueItems[0], next_date: "2026-05-27" }];
+
+      mockSql
+        .mockResolvedValueOnce(dueItems)
+        .mockResolvedValueOnce(allItems)
+        .mockResolvedValue(updatedItems);
+
+      const result = await getRecurringPageData();
+      expect(result.processed).toBeGreaterThanOrEqual(1);
+    });
+
+    it("should handle DB error gracefully", async () => {
+      mockSql.mockRejectedValueOnce(new Error("DB error"));
+      const result = await getRecurringPageData();
+      expect(result).toEqual({ items: [], processed: 0 });
     });
   });
 });

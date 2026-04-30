@@ -23,9 +23,6 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Force session read & sync
-  await supabase.auth.getSession()
-
   const {
     data: { session },
   } = await supabase.auth.getSession()

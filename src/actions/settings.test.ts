@@ -13,7 +13,7 @@ vi.mock("@/db/neon", () => ({ sql: mockSql }));
 vi.mock("next/cache", () => ({ revalidatePath: mockRevalidatePath }));
 vi.mock("@/actions/auth", () => ({ getAuthUser: mockGetAuthUser }));
 
-import { getUserSettings, updateUserSettings } from "@/actions/settings";
+import { getUserSettings, updateUserSettings, createUserProfile } from "@/actions/settings";
 
 // =============================================================================
 // Tests
@@ -97,6 +97,34 @@ describe("Settings Server Actions", () => {
       const result = await updateUserSettings(formData);
       expect(result.success).toBe(false);
       expect(result.error).toBe("Upsert failed");
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // createUserProfile
+  // ---------------------------------------------------------------------------
+  describe("createUserProfile", () => {
+    it("should create profile successfully", async () => {
+      mockSql.mockResolvedValueOnce([]);
+      const result = await createUserProfile({
+        userId: "user-123",
+        firstName: "John",
+        lastName: "Doe",
+        dateOfBirth: "1990-05-15",
+      });
+      expect(result).toEqual({ success: true });
+    });
+
+    it("should handle DB error gracefully", async () => {
+      mockSql.mockRejectedValueOnce(new Error("Insert failed"));
+      const result = await createUserProfile({
+        userId: "user-123",
+        firstName: "John",
+        lastName: "Doe",
+        dateOfBirth: "1990-05-15",
+      });
+      expect(result.success).toBe(false);
+      expect(result.error).toBe("Insert failed");
     });
   });
 });

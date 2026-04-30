@@ -6,7 +6,7 @@
 // Displays all user transactions with filters, stats, charts, and CRUD.
 // =============================================================================
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { TrendingUp, TrendingDown, Loader2, Pencil, Trash2, PieChart, List, Download } from "lucide-react";
@@ -15,6 +15,7 @@ import { getTransactions, deleteTransaction } from "@/actions/transactions";
 import { format } from "date-fns";
 import { EmptyState, ConfirmDialog } from "@/components/shared";
 import { formatCurrency } from "@/lib/utils";
+import { generateTransactionCSV } from "@/lib/csv";
 import {
   AddTransactionSheet,
   EditTransactionSheet,
@@ -42,26 +43,12 @@ export default function TransactionsPage() {
     search: "",
   });
 
+  // Increment to trigger data refetch from handlers
+  const [refreshKey, setRefreshKey] = useState(0);
+
   // ---------------------------------------------
   // Fetch Transactions
   // ---------------------------------------------
-  const fetchTransactions = useCallback(async () => {
-    setLoading(true);
-    const result = await getTransactions({
-      startDate: filters.startDate,
-      endDate: filters.endDate,
-      type: filters.type,
-      category: filters.category,
-    });
-    
-    if (!result.success) {
-      toast.error(result.error || "Failed to load transactions");
-    } else {
-      setTransactions(result.data as Transaction[]);
-    }
-    setLoading(false);
-  }, [filters]);
-
   useEffect(() => {
     let cancelled = false;
 
@@ -83,7 +70,7 @@ export default function TransactionsPage() {
     return () => {
       cancelled = true;
     };
-  }, [filters]);
+  }, [filters, refreshKey]);
 
   // ---------------------------------------------
   // Client-side search filter
@@ -112,7 +99,8 @@ export default function TransactionsPage() {
     
     if (result.success) {
       toast.success("Transaction deleted successfully");
-      fetchTransactions();
+      setRefreshKey((k) => k + 1);
+      window.dispatchEvent(new Event("budget-refresh"));
     } else {
       toast.error(result.error || "Failed to delete transaction");
     }
@@ -123,51 +111,7 @@ export default function TransactionsPage() {
   // Export to CSV
   // ---------------------------------------------
   const handleExportCSV = () => {
-    const escapeCSV = (val: string) => {
-      if (val.includes(",") || val.includes('"') || val.includes("\n")) {
-        return `"${val.replace(/"/g, '""')}"`;
-      }
-      return val;
-    };
-
-    // Calculate summary totals (same logic as TransactionStats)
-    const totals = filteredTransactions.reduce(
-      (acc, tx) => {
-        const amount = parseFloat(tx.amount);
-        if (tx.type === "income") {
-          acc.income += amount;
-          acc.incomeCount++;
-        } else {
-          acc.expense += amount;
-          acc.expenseCount++;
-        }
-        return acc;
-      },
-      { income: 0, expense: 0, incomeCount: 0, expenseCount: 0 }
-    );
-    const net = totals.income - totals.expense;
-
-    // Summary section
-    const summaryRows = [
-      ["Summary", "", "", "", "", ""],
-      ["Total Income", "", "", "", String(totals.income.toFixed(2)), `${totals.incomeCount} transactions`],
-      ["Total Expense", "", "", "", String(totals.expense.toFixed(2)), `${totals.expenseCount} transactions`],
-      ["Net", "", "", "", String(net.toFixed(2)), `${filteredTransactions.length} transactions`],
-      ["", "", "", "", "", ""],
-    ];
-
-    // Transaction rows
-    const headers = ["Date", "Type", "Category", "Description", "Amount", "Currency"];
-    const rows = filteredTransactions.map((tx) => [
-      format(new Date(tx.transaction_date), "dd MMM yyyy"),
-      tx.type,
-      tx.category || "",
-      tx.description || "",
-      `${tx.type === "income" ? "" : "-"}${tx.amount}`,
-      tx.currency,
-    ]);
-
-    const csv = [...summaryRows, headers, ...rows].map((row) => row.map(escapeCSV).join(",")).join("\n");
+    const csv = generateTransactionCSV(filteredTransactions);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -207,7 +151,7 @@ export default function TransactionsPage() {
             {showChart ? <List className="h-4 w-4" /> : <PieChart className="h-4 w-4" />}
           </Button>
           
-          <AddTransactionSheet onSuccess={fetchTransactions} />
+          <AddTransactionSheet onSuccess={() => setRefreshKey((k) => k + 1)} />
         </div>
       </div>
 
@@ -234,7 +178,7 @@ export default function TransactionsPage() {
         onOpenChange={(open) => !open && setEditingTransaction(null)}
         onSuccess={() => {
           setEditingTransaction(null);
-          fetchTransactions();
+          setRefreshKey((k) => k + 1);
         }}
       />
 

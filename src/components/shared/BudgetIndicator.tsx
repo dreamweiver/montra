@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { checkBudgetStatus } from "@/actions/budgets";
 import { formatCurrency } from "@/lib/utils";
 import type { BudgetStatus } from "@/types";
@@ -10,16 +10,25 @@ export default function BudgetIndicator() {
   const [status, setStatus] = useState<BudgetStatus | null>(null);
   const [animated, setAnimated] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
-  useEffect(() => {
+  const refresh = useCallback(() => {
     checkBudgetStatus().then((result) => {
       if (result.success && result.data?.hasBudget) {
         setStatus(result.data);
-        // Trigger animation after mount
         requestAnimationFrame(() => setAnimated(true));
       }
     });
   }, []);
+
+  useEffect(() => {
+    refresh();
+  }, [pathname, refresh]);
+
+  useEffect(() => {
+    window.addEventListener("budget-refresh", refresh);
+    return () => window.removeEventListener("budget-refresh", refresh);
+  }, [refresh]);
 
   if (!status) return null;
 

@@ -6,7 +6,7 @@
 // Sheet for creating a new recurring transaction.
 // =============================================================================
 
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -21,11 +21,10 @@ import { format } from "date-fns";
 import { CalendarIcon, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { addRecurringTransaction } from "@/actions/recurring";
-import { getCategories } from "@/actions/categories";
 import { recurringTransactionSchema, type RecurringTransactionFormData } from "@/lib/validations";
 import { LoadingOverlay, CurrencySelector } from "@/components/shared";
+import { useCategoryFetch } from "@/hooks/useCategoryFetch";
 import { FREQUENCY_OPTIONS, SUPPORTED_CURRENCIES, TRANSACTION_CATEGORIES } from "@/lib/constants";
-import type { Category } from "@/types";
 
 // =============================================================================
 // Props
@@ -40,7 +39,6 @@ interface AddRecurringSheetProps {
 export default function AddRecurringSheet({ onSuccess }: AddRecurringSheetProps) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
 
   const {
     register,
@@ -70,14 +68,8 @@ export default function AddRecurringSheet({ onSuccess }: AddRecurringSheetProps)
   const endDate = watch("end_date");
 
   // Fetch categories when type changes
-  useEffect(() => {
-    const fetchCategories = async () => {
-      const data = await getCategories(type);
-      setCategories(data);
-      setValue("category", "");
-    };
-    fetchCategories();
-  }, [type, setValue]);
+  const resetCategory = useCallback(() => setValue("category", ""), [setValue]);
+  const categories = useCategoryFetch(type, resetCategory);
 
   const onSubmit = async (data: RecurringTransactionFormData) => {
     setLoading(true);

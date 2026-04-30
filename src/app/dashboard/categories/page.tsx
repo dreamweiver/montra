@@ -14,7 +14,7 @@ import { Loader2, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import { getCategories, seedDefaultCategories } from "@/actions/categories";
 import { AddCategorySheet, EditCategorySheet, CategoryCard } from "@/components/features/categories";
-import { EmptyState } from "@/components/shared";
+import { EmptyState, PageLoader } from "@/components/shared";
 import { Category } from "@/types";
 
 // =============================================================================
@@ -78,11 +78,7 @@ export default function CategoriesPage() {
   // Loading State
   // =============================================================================
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
-    );
+    return <PageLoader />;
   }
 
   // =============================================================================

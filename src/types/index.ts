@@ -28,8 +28,6 @@ export type {
   RecurrenceFrequency,
 } from "./recurring";
 
-export type { ApiResponse } from "./api";
-
 export type { UserSettings } from "./settings";
 
 export type { Budget, BudgetStatus } from "./budget";

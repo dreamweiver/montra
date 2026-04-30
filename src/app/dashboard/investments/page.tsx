@@ -10,6 +10,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { RefreshCw, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
+import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -23,6 +24,7 @@ import {
   deleteInvestment,
 } from "@/actions/investments";
 import { refreshInvestmentPrices } from "@/actions/refreshPrices";
+import { toggleFavouriteStock, getFavouriteStockIds } from "@/actions/favourites";
 import {
   InvestmentStatsCards,
   AddInvestmentSheet,
@@ -58,6 +60,8 @@ export default function InvestmentsPage() {
   const [editingInvestment, setEditingInvestment] = useState<Investment | null>(null);
   const [editSheetOpen, setEditSheetOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [favouriteIds, setFavouriteIds] = useState<number[]>([]);
+  const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
 
   // ---------------------------------------------------------------------------
   // Fetch Data
@@ -65,9 +69,15 @@ export default function InvestmentsPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const { investments: data, stats: statsResult } = await getInvestmentPageData();
+      const [{ investments: data, stats: statsResult }, favIds] = await Promise.all([
+        getInvestmentPageData(),
+        getFavouriteStockIds(),
+      ]);
       setInvestments(data.map(computeGains));
       setStats(statsResult);
+      setFavouriteIds(favIds);
+      setLastRefreshed(new Date());
+      window.dispatchEvent(new Event("stock-refresh"));
     } catch (error) {
       console.error("Failed to fetch investments:", error);
       toast.error("Failed to load investments");
@@ -107,6 +117,8 @@ export default function InvestmentsPage() {
         toast.info("No price updates available");
       }
       await fetchData();
+      setLastRefreshed(new Date());
+      window.dispatchEvent(new Event("stock-refresh"));
     } catch (error) {
       console.error("Failed to refresh prices:", error);
       toast.error("Failed to refresh prices");
@@ -131,6 +143,26 @@ export default function InvestmentsPage() {
   };
 
   // ---------------------------------------------------------------------------
+  // Toggle Favourite
+  // ---------------------------------------------------------------------------
+  const handleToggleFavourite = async (investmentId: number) => {
+    const wasFavourite = favouriteIds.includes(investmentId);
+    const optimisticIds = wasFavourite
+      ? favouriteIds.filter((id) => id !== investmentId)
+      : [...favouriteIds, investmentId];
+    setFavouriteIds(optimisticIds);
+
+    const result = await toggleFavouriteStock(investmentId);
+    if (result.success) {
+      window.dispatchEvent(new Event("stock-refresh"));
+      toast.success(result.isFavourite ? "Added to favourites" : "Removed from favourites");
+    } else {
+      setFavouriteIds(favouriteIds);
+      toast.error(result.error || "Failed to update favourite");
+    }
+  };
+
+  // ---------------------------------------------------------------------------
   // Edit
   // ---------------------------------------------------------------------------
   const handleEdit = (investment: Investment) => {
@@ -139,12 +171,17 @@ export default function InvestmentsPage() {
   };
 
   // ---------------------------------------------------------------------------
-  // Filtered Investments
+  // Filtered & Sorted Investments (favourites first)
   // ---------------------------------------------------------------------------
-  const filteredInvestments =
+  const filteredInvestments = (
     filterType === "all"
       ? investments
-      : investments.filter((inv) => inv.type === filterType);
+      : investments.filter((inv) => inv.type === filterType)
+  ).sort((a, b) => {
+    const aFav = favouriteIds.includes(a.id) ? 0 : 1;
+    const bFav = favouriteIds.includes(b.id) ? 0 : 1;
+    return aFav - bFav;
+  });
 
   // =============================================================================
   // Loading State
@@ -196,17 +233,29 @@ export default function InvestmentsPage() {
             </SelectContent>
           </Select>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRefreshPrices}
-            disabled={refreshingPrices}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${refreshingPrices ? "animate-spin" : ""}`} />
-            {refreshingPrices ? "Refreshing..." : "Refresh Prices"}
-          </Button>
+          <div className="flex flex-col items-end gap-1">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefreshPrices}
+              disabled={refreshingPrices}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${refreshingPrices ? "animate-spin" : ""}`} />
+              {refreshingPrices ? "Refreshing..." : "Refresh Prices"}
+            </Button>
+            {lastRefreshed && (
+              <p className="text-xs text-muted-foreground">
+                Last refreshed: {format(lastRefreshed, "dd MMM yyyy, HH:mm")}
+              </p>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Favourite Info */}
+      <p className="text-xs text-muted-foreground">
+        Tip: Mark up to 3 stocks as favourites (star icon) to see their live gain/loss in the dashboard header.
+      </p>
 
       {/* Holdings Table */}
       {filteredInvestments.length === 0 ? (
@@ -224,6 +273,8 @@ export default function InvestmentsPage() {
           {/* Desktop Table */}
           <InvestmentTable
             investments={filteredInvestments}
+            favouriteIds={favouriteIds}
+            onToggleFavourite={handleToggleFavourite}
             onEdit={handleEdit}
             onDelete={(id) => setDeleteId(id)}
           />
@@ -231,6 +282,8 @@ export default function InvestmentsPage() {
           {/* Mobile Cards */}
           <InvestmentCardList
             investments={filteredInvestments}
+            favouriteIds={favouriteIds}
+            onToggleFavourite={handleToggleFavourite}
             onEdit={handleEdit}
             onDelete={(id) => setDeleteId(id)}
           />

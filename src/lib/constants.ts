@@ -150,3 +150,5 @@ export const INVESTMENT_TYPES = [
 ] as const;
 
 export const LIVE_FETCH_TYPES: readonly string[] = ["stock", "mutual_fund", "crypto"];
+
+export const MAX_FAVOURITE_STOCKS = 3;

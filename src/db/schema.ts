@@ -88,6 +88,7 @@ export const userSettings = pgTable("user_settings", {
   date_of_birth: timestamp("date_of_birth"),                          // User's date of birth
   default_currency: text("default_currency").default("INR").notNull(), // Preferred currency code
   date_format: text("date_format").default("dd/MM/yyyy").notNull(),  // Preferred date format
+  favourite_stock_ids: text("favourite_stock_ids"),                    // JSON array of investment IDs, e.g. "[1,2,3]"
   created_at: timestamp("created_at").defaultNow().notNull(),        // Record creation time
   updated_at: timestamp("updated_at").defaultNow().notNull(),        // Last update time
 });

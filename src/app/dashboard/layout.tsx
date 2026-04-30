@@ -1,15 +1,16 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useTransition } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { getUserSettings } from "@/actions/settings";
+import { refreshInvestmentPrices } from "@/actions/refreshPrices";
 import { useIdleLogout } from "@/hooks/useIdleLogout";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { LogOut, Menu, X } from "lucide-react";
-import { ThemeToggle, BudgetIndicator } from "@/components/shared";
+import { ThemeToggle, BudgetIndicator, StockIndicator } from "@/components/shared";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { NAV_ITEMS } from "@/lib/config/navigation";
 
@@ -28,9 +29,13 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const [, startTransition] = useTransition();
+  const [navigatingTo, setNavigatingTo] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
+
+  const pendingPath = navigatingTo && navigatingTo !== pathname ? navigatingTo : null;
 
   // ---------------------------------------------------------------------------
   // Logout
@@ -57,6 +62,9 @@ export default function DashboardLayout({
       if (result.success && result.data?.first_name) {
         setUserName(result.data.first_name);
       }
+    });
+    refreshInvestmentPrices().then(() => {
+      window.dispatchEvent(new Event("stock-refresh"));
     });
   }, []);
 
@@ -85,11 +93,21 @@ export default function DashboardLayout({
           <nav className="flex-1 p-4 space-y-2">
             {NAV_ITEMS.map((item) => {
               const isActive = pathname === item.path;
+              const isPendingNav = pendingPath === item.path;
               return (
-                <Link key={item.label} href={item.path}>
+                <Link
+                  key={item.label}
+                  href={item.path}
+                  onClick={(e) => {
+                    if (isActive) return;
+                    e.preventDefault();
+                    setNavigatingTo(item.path);
+                    startTransition(() => router.push(item.path));
+                  }}
+                >
                   <Button
-                    variant={isActive ? "secondary" : "ghost"}
-                    className="w-full justify-start cursor-pointer"
+                    variant={isActive || isPendingNav ? "secondary" : "ghost"}
+                    className={`w-full justify-start cursor-pointer ${isActive || isPendingNav ? "bg-neutral-200 dark:bg-neutral-700 font-semibold" : ""} ${isPendingNav ? "opacity-70 animate-pulse" : ""}`}
                   >
                     <item.icon className="mr-3 h-5 w-5" />
                     {sidebarOpen && item.label}
@@ -127,11 +145,22 @@ export default function DashboardLayout({
             <nav className="flex-1 p-4 space-y-2">
               {NAV_ITEMS.map((item) => {
                 const isActive = pathname === item.path;
+                const isPendingNav = pendingPath === item.path;
                 return (
-                  <Link key={item.label} href={item.path} onClick={() => setMobileMenuOpen(false)}>
+                  <Link
+                    key={item.label}
+                    href={item.path}
+                    onClick={(e) => {
+                      setMobileMenuOpen(false);
+                      if (isActive) return;
+                      e.preventDefault();
+                      setNavigatingTo(item.path);
+                      startTransition(() => router.push(item.path));
+                    }}
+                  >
                     <Button
-                      variant={isActive ? "secondary" : "ghost"}
-                      className="w-full justify-start cursor-pointer"
+                      variant={isActive || isPendingNav ? "secondary" : "ghost"}
+                      className={`w-full justify-start cursor-pointer ${isActive || isPendingNav ? "bg-neutral-200 dark:bg-neutral-700 font-semibold" : ""} ${isPendingNav ? "opacity-70 animate-pulse" : ""}`}
                     >
                       <item.icon className="mr-3 h-5 w-5" />
                       {item.label}
@@ -171,7 +200,8 @@ export default function DashboardLayout({
           </div>
 
           <div className="flex items-center gap-2 md:gap-4">
-            <div className="hidden sm:block">
+            <div className="hidden sm:flex items-center gap-3">
+              <StockIndicator />
               <BudgetIndicator />
             </div>
             <ThemeToggle />

@@ -38,4 +38,5 @@ export type {
   InvestmentStats,
   InvestmentType,
   SymbolSearchResult,
+  FavouriteStockStatus,
 } from "./investment";

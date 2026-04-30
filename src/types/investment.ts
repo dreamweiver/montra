@@ -44,3 +44,11 @@ export interface SymbolSearchResult {
   exchange: string;
   quoteType: string;
 }
+
+export interface FavouriteStockStatus {
+  id: number;
+  name: string;
+  symbol: string | null;
+  gain_percentage: number;
+  is_positive: boolean;
+}

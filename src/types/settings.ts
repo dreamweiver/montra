@@ -15,6 +15,7 @@ export interface UserSettings {
   date_of_birth: string | null;
   default_currency: string;
   date_format: string;
+  favourite_stock_ids: string | null;
   created_at: string;
   updated_at: string;
 }

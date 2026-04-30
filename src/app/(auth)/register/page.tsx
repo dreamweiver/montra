@@ -14,9 +14,6 @@ import { createUserProfile } from "@/actions/settings";
 import { toast } from "sonner";
 import { registerSchema, type RegisterFormData } from "@/lib/validations";
 
-// =============================================================================
-// Main Component
-// =============================================================================
 export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -83,7 +80,7 @@ export default function RegisterPage() {
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" autoComplete="off">
             {/* Name Fields */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
@@ -92,6 +89,7 @@ export default function RegisterPage() {
                   id="firstName"
                   type="text"
                   placeholder="John"
+                  autoComplete="off"
                   {...register("firstName")}
                   className={errors.firstName ? "border-red-500 focus-visible:ring-red-500" : ""}
                 />
@@ -105,6 +103,7 @@ export default function RegisterPage() {
                   id="lastName"
                   type="text"
                   placeholder="Doe"
+                  autoComplete="off"
                   {...register("lastName")}
                   className={errors.lastName ? "border-red-500 focus-visible:ring-red-500" : ""}
                 />
@@ -140,6 +139,7 @@ export default function RegisterPage() {
                 id="email"
                 type="email"
                 placeholder="name@example.com"
+                autoComplete="new-email"
                 {...register("email")}
                 className={errors.email ? "border-red-500 focus-visible:ring-red-500" : ""}
               />
@@ -154,6 +154,7 @@ export default function RegisterPage() {
               <Input
                 id="password"
                 type="password"
+                autoComplete="new-password"
                 {...register("password")}
                 className={errors.password ? "border-red-500 focus-visible:ring-red-500" : ""}
               />

@@ -16,6 +16,27 @@ import { parseInvestmentFormData } from "@/lib/formData";
 import type { Investment, InvestmentStats } from "@/types";
 import { refreshInvestmentPrices } from "@/actions/refreshPrices";
 
+// =============================================================================
+// Helpers
+// =============================================================================
+async function pruneFavouriteId(userId: string, investmentId: number) {
+  try {
+    const settings = await sql`
+      SELECT favourite_stock_ids FROM user_settings WHERE user_id = ${userId} LIMIT 1
+    `;
+    if (settings.length === 0 || !settings[0].favourite_stock_ids) return;
+    const ids: number[] = JSON.parse(settings[0].favourite_stock_ids);
+    if (!ids.includes(investmentId)) return;
+    const newIds = ids.filter((id) => id !== investmentId);
+    await sql`
+      UPDATE user_settings SET favourite_stock_ids = ${JSON.stringify(newIds)}, updated_at = NOW()
+      WHERE user_id = ${userId}
+    `;
+  } catch {
+    // Non-critical — silently ignore
+  }
+}
+
 export interface InvestmentPageData {
   investments: Investment[];
   stats: InvestmentStats;
@@ -115,6 +136,11 @@ export async function updateInvestment(
       return { success: false, error: "Investment not found" };
     }
 
+    // Prune from favourites if type changed away from stock
+    if (type !== "stock") {
+      await pruneFavouriteId(user.id, id);
+    }
+
     revalidatePath("/dashboard/investments");
     return { success: true };
   } catch (error: unknown) {
@@ -145,6 +171,8 @@ export async function deleteInvestment(
     if (result.length === 0) {
       return { success: false, error: "Investment not found" };
     }
+
+    await pruneFavouriteId(user.id, id);
 
     revalidatePath("/dashboard/investments");
     return { success: true };

@@ -4,7 +4,7 @@
 // Mobile card view of investment holdings with gain/loss display.
 // =============================================================================
 
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
 import { getTypeLabel } from "@/lib/investment";
@@ -15,6 +15,8 @@ import type { Investment, InvestmentWithGains } from "@/types";
 // =============================================================================
 interface InvestmentCardListProps {
   investments: InvestmentWithGains[];
+  favouriteIds: number[];
+  onToggleFavourite: (id: number) => void;
   onEdit: (investment: Investment) => void;
   onDelete: (id: number) => void;
 }
@@ -22,7 +24,7 @@ interface InvestmentCardListProps {
 // =============================================================================
 // Main Component
 // =============================================================================
-export default function InvestmentCardList({ investments, onEdit, onDelete }: InvestmentCardListProps) {
+export default function InvestmentCardList({ investments, favouriteIds, onToggleFavourite, onEdit, onDelete }: InvestmentCardListProps) {
   return (
     <div className="md:hidden space-y-3">
       {investments.map((inv) => {
@@ -74,6 +76,19 @@ export default function InvestmentCardList({ investments, onEdit, onDelete }: In
 
             {/* Actions */}
             <div className="flex items-center justify-end gap-2 pt-1 border-t">
+              {inv.type === "stock" && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8"
+                  onClick={() => onToggleFavourite(inv.id)}
+                >
+                  <Star
+                    className={`h-3.5 w-3.5 mr-1 ${favouriteIds.includes(inv.id) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"}`}
+                  />
+                  Fav
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="sm"

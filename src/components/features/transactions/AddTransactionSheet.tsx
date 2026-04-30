@@ -129,6 +129,7 @@ export default function AddTransactionSheet({ onSuccess }: AddTransactionSheetPr
       reset();
       setOpen(false);
       onSuccess?.();
+      window.dispatchEvent(new Event("budget-refresh"));
 
       // Check budget status after adding an expense
       if (data.type === "expense") {

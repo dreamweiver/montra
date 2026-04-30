@@ -101,19 +101,6 @@ export const PAGINATION = {
 } as const;
 
 // ---------------------------------------------
-// Routes
-// ---------------------------------------------
-export const ROUTES = {
-  home: "/",
-  login: "/login",
-  register: "/register",
-  dashboard: "/dashboard",
-  transactions: "/dashboard/transactions",
-  investments: "/dashboard/investments",
-  settings: "/dashboard/settings",
-} as const;
-
-// ---------------------------------------------
 // Category Emojis
 // ---------------------------------------------
 export const CATEGORY_EMOJIS = [
@@ -163,3 +150,5 @@ export const INVESTMENT_TYPES = [
 ] as const;
 
 export const LIVE_FETCH_TYPES: readonly string[] = ["stock", "mutual_fund", "crypto"];
+
+export const MAX_FAVOURITE_STOCKS = 3;

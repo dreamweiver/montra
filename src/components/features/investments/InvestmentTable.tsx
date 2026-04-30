@@ -4,7 +4,7 @@
 // Desktop table view of investment holdings with gain/loss display.
 // =============================================================================
 
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
 import { getTypeLabel } from "@/lib/investment";
@@ -15,6 +15,8 @@ import type { Investment, InvestmentWithGains } from "@/types";
 // =============================================================================
 interface InvestmentTableProps {
   investments: InvestmentWithGains[];
+  favouriteIds: number[];
+  onToggleFavourite: (id: number) => void;
   onEdit: (investment: Investment) => void;
   onDelete: (id: number) => void;
 }
@@ -22,7 +24,7 @@ interface InvestmentTableProps {
 // =============================================================================
 // Main Component
 // =============================================================================
-export default function InvestmentTable({ investments, onEdit, onDelete }: InvestmentTableProps) {
+export default function InvestmentTable({ investments, favouriteIds, onToggleFavourite, onEdit, onDelete }: InvestmentTableProps) {
   return (
     <div className="hidden md:block rounded-lg border overflow-hidden">
       <table className="w-full text-sm">
@@ -81,6 +83,18 @@ export default function InvestmentTable({ investments, onEdit, onDelete }: Inves
                 </td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex items-center justify-end gap-1">
+                    {inv.type === "stock" && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => onToggleFavourite(inv.id)}
+                      >
+                        <Star
+                          className={`h-4 w-4 ${favouriteIds.includes(inv.id) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"}`}
+                        />
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="icon"

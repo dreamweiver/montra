@@ -100,7 +100,7 @@ export default function RegisterPage() {
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleRegister} className="space-y-4">
+          <form onSubmit={handleRegister} className="space-y-4" autoComplete="off">
             {/* Name Fields */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
@@ -111,6 +111,7 @@ export default function RegisterPage() {
                   placeholder="John"
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
+                  autoComplete="off"
                   required
                 />
               </div>
@@ -122,6 +123,7 @@ export default function RegisterPage() {
                   placeholder="Doe"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
+                  autoComplete="off"
                   required
                 />
               </div>
@@ -152,6 +154,7 @@ export default function RegisterPage() {
                 placeholder="name@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                autoComplete="new-email"
                 required
               />
             </div>
@@ -164,6 +167,7 @@ export default function RegisterPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                autoComplete="new-password"
                 required
               />
               <p className="text-xs text-muted-foreground">

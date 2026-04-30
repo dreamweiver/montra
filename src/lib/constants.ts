@@ -101,19 +101,6 @@ export const PAGINATION = {
 } as const;
 
 // ---------------------------------------------
-// Routes
-// ---------------------------------------------
-export const ROUTES = {
-  home: "/",
-  login: "/login",
-  register: "/register",
-  dashboard: "/dashboard",
-  transactions: "/dashboard/transactions",
-  investments: "/dashboard/investments",
-  settings: "/dashboard/settings",
-} as const;
-
-// ---------------------------------------------
 // Category Emojis
 // ---------------------------------------------
 export const CATEGORY_EMOJIS = [

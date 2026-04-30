@@ -100,6 +100,7 @@ export default function TransactionsPage() {
     if (result.success) {
       toast.success("Transaction deleted successfully");
       setRefreshKey((k) => k + 1);
+      window.dispatchEvent(new Event("budget-refresh"));
     } else {
       toast.error(result.error || "Failed to delete transaction");
     }

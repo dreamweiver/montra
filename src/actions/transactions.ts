@@ -35,6 +35,7 @@ export async function addTransaction(formData: FormData) {
     `;
 
     revalidatePath("/dashboard/transactions");
+    revalidatePath("/dashboard");
     refreshInvestmentPrices().catch(() => {});
 
     return { success: true };
@@ -111,6 +112,7 @@ export async function deleteTransaction(id: number) {
     }
 
     revalidatePath("/dashboard/transactions");
+    revalidatePath("/dashboard");
     refreshInvestmentPrices().catch(() => {});
 
     return { success: true };
@@ -154,6 +156,7 @@ export async function updateTransaction(id: number, formData: FormData) {
     }
 
     revalidatePath("/dashboard/transactions");
+    revalidatePath("/dashboard");
     refreshInvestmentPrices().catch(() => {});
 
     return { success: true };

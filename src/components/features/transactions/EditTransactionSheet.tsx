@@ -128,6 +128,7 @@ export default function EditTransactionSheet({
 
       toast.success("Transaction updated successfully!");
       onSuccess?.();
+      window.dispatchEvent(new Event("budget-refresh"));
 
     } catch (error: unknown) {
       const message = extractErrorMessage(error);

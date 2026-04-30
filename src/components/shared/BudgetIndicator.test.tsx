@@ -15,6 +15,7 @@ vi.mock("@/actions/budgets", () => ({
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockRouterPush }),
+  usePathname: () => "/dashboard",
 }));
 
 vi.mock("@/lib/utils", () => ({

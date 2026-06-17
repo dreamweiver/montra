@@ -12,6 +12,8 @@ const baseInvestment: Investment = {
   purchase_price: "100",
   current_price: "150",
   currency: "INR",
+  market_price: null,
+  market_currency: null,
   purchase_date: "2024-01-01",
   notes: null,
   created_at: "2024-01-01",

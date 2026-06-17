@@ -122,6 +122,8 @@ export const investments = pgTable("investments", {
   purchase_price: numeric("purchase_price", { precision: 12, scale: 2 }).notNull(),
   current_price: numeric("current_price", { precision: 12, scale: 2 }).notNull(),
   currency: text("currency").default("INR").notNull(),
+  market_price: numeric("market_price", { precision: 12, scale: 2 }),     // Last fetched native quote price
+  market_currency: text("market_currency"),                                // Native trading currency (e.g. EUR, USD)
   purchase_date: timestamp("purchase_date").notNull(),
   notes: text("notes"),
   created_at: timestamp("created_at").defaultNow().notNull(),

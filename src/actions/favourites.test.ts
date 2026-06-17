@@ -143,6 +143,8 @@ describe("favourites actions", () => {
             purchase_price: "100",
             current_price: "120",
             currency: "USD",
+            market_price: null,
+            market_currency: null,
             user_id: "u1",
             purchase_date: "2024-01-01",
             notes: null,
@@ -157,6 +159,40 @@ describe("favourites actions", () => {
       expect(result[0].symbol).toBe("AAPL");
       expect(result[0].gain_percentage).toBe(20);
       expect(result[0].is_positive).toBe(true);
+      expect(result[0].currency).toBe("USD");
+      expect(result[0].current_price).toBe(120);
+      expect(result[0].market_price).toBeNull();
+      expect(result[0].market_currency).toBeNull();
+    });
+
+    it("includes native market price and currency when present", async () => {
+      mockGetAuthUser.mockResolvedValue({ id: "u1" });
+      mockSql
+        .mockResolvedValueOnce([{ favourite_stock_ids: "[1]" }])
+        .mockResolvedValueOnce([
+          {
+            id: 1,
+            name: "SAP",
+            symbol: "SAP.DE",
+            type: "stock",
+            quantity: "5",
+            purchase_price: "20000",
+            current_price: "27500",
+            currency: "INR",
+            market_price: "312.45",
+            market_currency: "EUR",
+            user_id: "u1",
+            purchase_date: "2024-01-01",
+            notes: null,
+            created_at: "2024-01-01",
+            updated_at: "2024-01-01",
+          },
+        ]);
+
+      const result = await getFavouriteStocksStatus();
+      expect(result[0].currency).toBe("INR");
+      expect(result[0].market_price).toBe(312.45);
+      expect(result[0].market_currency).toBe("EUR");
     });
   });
 });

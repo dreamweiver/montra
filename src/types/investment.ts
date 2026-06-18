@@ -17,6 +17,8 @@ export interface Investment {
   purchase_price: string;
   current_price: string;
   currency: string;
+  market_price: string | null;
+  market_currency: string | null;
   purchase_date: string;
   notes: string | null;
   created_at: string;
@@ -51,4 +53,8 @@ export interface FavouriteStockStatus {
   symbol: string | null;
   gain_percentage: number;
   is_positive: boolean;
+  currency: string;
+  current_price: number;
+  market_price: number | null;
+  market_currency: string | null;
 }

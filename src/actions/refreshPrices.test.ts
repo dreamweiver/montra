@@ -58,6 +58,13 @@ describe("refreshInvestmentPrices", () => {
 
     const result = await refreshInvestmentPrices();
     expect(result).toEqual({ updated: 1 });
+    // Native price + currency should be persisted alongside current_price.
+    const updateCall = mockSql.mock.calls.find((args) =>
+      Array.isArray(args[0]) && args[0].some((s: string) => typeof s === "string" && s.includes("market_price"))
+    );
+    expect(updateCall).toBeDefined();
+    // Drizzle template-tag interpolation order: convertedPrice, native price, native currency, id, user_id.
+    expect(updateCall).toEqual(expect.arrayContaining([180, "USD"]));
   });
 
   it("should convert currency when quote currency differs from investment currency", async () => {

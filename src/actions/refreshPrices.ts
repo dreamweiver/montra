@@ -110,7 +110,10 @@ export async function refreshInvestmentPrices(): Promise<{ updated: number }> {
 
       await sql`
         UPDATE investments
-        SET current_price = ${convertedPrice}, updated_at = NOW()
+        SET current_price = ${convertedPrice},
+            market_price = ${price},
+            market_currency = ${quoteCurrency},
+            updated_at = NOW()
         WHERE id = ${id} AND user_id = ${user.id}
       `;
       updated++;

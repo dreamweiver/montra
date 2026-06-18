@@ -71,12 +71,17 @@ export async function getFavouriteStocksStatus(): Promise<FavouriteStockStatus[]
 
   return (investments as unknown as Investment[]).map((inv) => {
     const withGains = computeGains(inv);
+    const marketPrice = inv.market_price != null ? Number(inv.market_price) : null;
     return {
       id: inv.id,
       name: inv.name,
       symbol: inv.symbol,
       gain_percentage: withGains.gain_percentage,
       is_positive: withGains.gain_loss >= 0,
+      currency: inv.currency,
+      current_price: Number(inv.current_price),
+      market_price: marketPrice != null && !Number.isNaN(marketPrice) ? marketPrice : null,
+      market_currency: inv.market_currency,
     };
   });
 }
